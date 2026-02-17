@@ -11,6 +11,8 @@ services:
     volumes:
       - ./Server:/Server
       - /Server/node_modules
+    networks:
+      - man
     restart: always
 
   # --- FRONTEND SERVICE (VITE) ---
@@ -25,5 +27,13 @@ services:
       - /Client/node_modules
     depends_on:
       - backend
+    networks:
+      - man
     restart: always
+ 
+
+networks:
+  man:
+    driver: bridge
+    
 
