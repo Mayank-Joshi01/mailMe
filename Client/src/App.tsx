@@ -1,18 +1,31 @@
-import './App.css'
+import { useState } from 'react'
+import { AppProvider } from './context/AppContext'
+import Navbar from './components/Navbar'
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 
-function App() {
+type Page = 'home' | 'login' | 'register'
+
+function AppContent() {
+  const [page, setPage] = useState<Page>('home')
+
+  // Login and Register don't show the Navbar
+  if (page === 'login')    return <LoginPage onNavigate={setPage} />
+  if (page === 'register') return <RegisterPage onNavigate={setPage} />
 
   return (
-    <>
-    
-    <div className="text-2xl font-bold text-blue-600">Welcome to the MailMe Client App! it is running through Docker Compose.</div>
-    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Click Me</button>
-    <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Sign in</button>
-    <button className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Sign Up</button>
-    <hr />
-    <h2 className="text-xl font-semibold text-gray-800">This page is rendered by the MailMe Client App!</h2>
-    </>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <Navbar onNavigate={setPage} />
+      <HomePage onNavigate={setPage} />
+    </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
+  )
+}
