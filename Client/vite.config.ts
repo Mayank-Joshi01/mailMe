@@ -10,5 +10,8 @@ export default defineConfig({
       usePolling: true, // Forces Vite to check files manually
     },
     host: true, // Needed so you can access it via localhost:5173
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
   },
 })

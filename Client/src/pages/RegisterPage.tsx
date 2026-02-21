@@ -40,9 +40,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
   }
 
   // Replace with real Google OAuth when ready
-  const handleGoogleRegister = () => {
-    register({ name: 'Google User', email: 'googleuser@gmail.com' })
-    onNavigate('home')
+  const handleGoogleRegister = async () => {
+
   }
 
   return (
@@ -58,7 +57,24 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
         
           </div>
 
-          {/* ── Google Button (new) ── */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <InputField label="Full Name" placeholder="John Doe" value={name} onChange={setName} error={errors.name} />
+            <InputField label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} error={errors.email} />
+            <InputField label="Password" type="password" placeholder="Min. 8 characters" value={password} onChange={setPassword} error={errors.password} />
+            <InputField label="Confirm Password" type="password" placeholder="Repeat your password" value={confirm} onChange={setConfirm} error={errors.confirm} />
+            <Button type="submit" disabled={loading} fullWidth>
+              {loading ? 'Creating account...' : 'Create Account'}
+            </Button>
+          </form>
+
+          {/* ── Divider (new) ── */}
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+          </div>
+
+                    {/* ── Google Button (new) ── */}
           <button
             onClick={handleGoogleRegister}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border
@@ -70,22 +86,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
             Continue with Google
           </button>
 
-          {/* ── Divider (new) ── */}
-          <div className="flex items-center gap-3 my-4">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <InputField label="Full Name" placeholder="John Doe" value={name} onChange={setName} error={errors.name} />
-            <InputField label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} error={errors.email} />
-            <InputField label="Password" type="password" placeholder="Min. 8 characters" value={password} onChange={setPassword} error={errors.password} />
-            <InputField label="Confirm Password" type="password" placeholder="Repeat your password" value={confirm} onChange={setConfirm} error={errors.confirm} />
-            <Button type="submit" disabled={loading} fullWidth>
-              {loading ? 'Creating account...' : 'Create Account'}
-            </Button>
-          </form>
+          
 
           <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-5">
             Already have an account?{' '}

@@ -46,6 +46,22 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             </div>
           </div>
 
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <InputField label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} />
+            <InputField label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} />
+            {error && <p className="text-sm text-red-500">{error}</p>}
+            <Button type="submit" disabled={loading} fullWidth>
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
+
+          {/* ── Divider (new) ── */}
+          <div className="flex items-center gap-3 my-4">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+            <span className="text-xs text-gray-400">or</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+          </div>
+
           {/* ── Google Button (new) ── */}
           <button
             onClick={handleGoogleLogin}
@@ -57,23 +73,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
             Continue with Google
           </button>
-
-          {/* ── Divider (new) ── */}
-          <div className="flex items-center gap-3 my-4">
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-            <span className="text-xs text-gray-400">or</span>
-            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <InputField label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} />
-            <InputField label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} />
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            <Button type="submit" disabled={loading} fullWidth>
-              {loading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-
+          
           <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-5">
             Don't have an account?{' '}
             <button onClick={() => onNavigate('register')} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">

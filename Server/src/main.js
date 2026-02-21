@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 
-// connectDB();
+connectDB();
 
 app.get('/', (req, res) => {
   res.send('Hello World! From MailMe');
