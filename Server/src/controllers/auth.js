@@ -3,7 +3,7 @@ const Token = require("../models/Token");
 const User = require("../models/User");
 const PendingUser = require("../models/PendingUse");
 const bcrypt = require('bcryptjs');
-const {sendEmail} = require("../Services/Mail");
+const { sendEmail } = require("../Services/Mail");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -18,7 +18,10 @@ async function generateMagicLink(userEmail) {
     // 3. Set expiration (e.g., 15 mins from now)
     const expires = new Date(Date.now() + 15 * 60 * 1000);
 
-    // 4. Save to DB (pseudo-code)
+    // 4. Delete any existing tokens for this email to prevent multiple valid tokens
+    await Token.deleteMany({ email: userEmail });
+
+    // 5. Save to DB (pseudo-code)
     await Token.create({
         email: userEmail,
         tokenHash: hash,
@@ -47,15 +50,25 @@ const Register = async (req, res) => {
         // 4. Send the magic link via email
         await sendEmail(email, "Verification Link for MailMe", `<p>Click the link below to verify your email and complete registration:</p><a href="${token}">Verify Email</a>`);
 
-        // 5. Save pending user to DB
-        await PendingUser.create({
-            name,
-            email,
-            password: hashedPassword,
-            tokenHash: token.split('?token=')[1].split('&email=')[0]
-        });
 
-        res.status(200).send({ message: "Registration successful! Please check your email to verify your account.", success: true , link: token});
+        const tokenHash = token.split('?token=')[1].split('&email=')[0]
+
+        // 2. The "Upsert" - Atomic Update or Create
+        await PendingUser.findOneAndUpdate(
+            { email }, // Find by email
+            {
+                name,
+                password: hashedPassword,
+                tokenHash
+            },
+            {
+                upsert: true, // Create if doesn't exist
+                new: true,    // Return the updated document
+                runValidators: true
+            }
+        );
+        
+        res.status(200).send({ message: "Registration successful! Please check your email to verify your account.", success: true, link: token });
 
     } catch (err) {
         console.error(err);
@@ -105,11 +118,11 @@ const VerifyMagicLink = async (req, res) => {
     // Delete pending user record
     await PendingUser.deleteOne({ email });
 
-    res.status(200).send({ message: "Email verified! You can now log in.", success: true });
+    res.status(200).send({ message: "Email verified! You can now log in.", success: true, token: jwtToken });
 }
 
 const Login = async (req, res) => {
-    const { email , password } = req.body;
+    const { email, password } = req.body;
 
 
     res.send("Login endpoint");

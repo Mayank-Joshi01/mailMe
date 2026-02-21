@@ -6,7 +6,7 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 app.use(express.json());
-
+app.set('trust proxy', 1);
 
 connectDB();
 
