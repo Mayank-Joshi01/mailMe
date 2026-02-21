@@ -16,6 +16,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
+  const {showAlert} = useAuth();
+
   const validate = () => {
     const e: Record<string, string> = {}
     if (!name.trim()) e.name = 'Name is required.'
@@ -23,6 +25,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Enter a valid email.'
     if (!password) e.password = 'Password is required.'
     else if (password.length < 8) e.password = 'At least 8 characters.'
+    else if (password.length > 64) e.password = 'No more than 64 characters.'
     if (password !== confirm) e.confirm = 'Passwords do not match.'
     setErrors(e)
     return Object.keys(e).length === 0
@@ -36,7 +39,8 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
       register({ name, email })
       setLoading(false)
       onNavigate('home')
-    }, 800)
+      showAlert('Account created successfully!', 'success');
+    }, 1000)
   }
 
   // Replace with real Google OAuth when ready
