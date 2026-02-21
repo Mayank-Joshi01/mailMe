@@ -38,6 +38,12 @@ const Register = async (req, res) => {
         /// Gettigng data from req.body
         const { name, email, password } = req.body;
 
+        const existingUser = await User.findOne({ email });
+        
+        if (existingUser) {
+            return res.status(400).send({ message: "Email already registered.", success: false });
+        }
+
         // 1. Generate a salt (10 rounds is standard)
         const salt = await bcrypt.genSalt(10);
 
@@ -67,7 +73,7 @@ const Register = async (req, res) => {
                 runValidators: true
             }
         );
-        
+
         res.status(200).send({ message: "Registration successful! Please check your email to verify your account.", success: true, link: token });
 
     } catch (err) {
@@ -105,14 +111,14 @@ const VerifyMagicLink = async (req, res) => {
     if (!pendingUser) {
         return res.status(404).send({ message: "Pending user not found.", success: false });
     }
-    await User.create({
+    const user = await User.create({
         name: pendingUser.name,
         email: pendingUser.email,
         password: pendingUser.password
     });
 
     // Create Session or JWT here if you want to log them in immediately
-    const jwtToken = jwt.sign({ email: pendingUser.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const jwtToken = jwt.sign({ email: user.email , id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
 
     // Delete pending user record
@@ -123,7 +129,6 @@ const VerifyMagicLink = async (req, res) => {
 
 const Login = async (req, res) => {
     const { email, password } = req.body;
-
 
     res.send("Login endpoint");
 }
