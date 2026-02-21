@@ -128,10 +128,46 @@ const VerifyMagicLink = async (req, res) => {
 }
 
 const Login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    res.send("Login endpoint");
+try {
+    // 1. Find user (Only select the password field if you've set it to 'select: false' in schema)
+    const user = await User.findOne({ email });
+
+    // Security Tip: Use the same generic message for both "not found" and "wrong password"
+    // to prevent "Email Enumeration" attacks.
+    if (!user) {
+        return res.status(400).send({ message: "Invalid email or password.", success: false });
+    }
+
+    // 2. CORRECT Comparison
+    // Pass the PLAIN password from req.body, NOT a new hashedPassword.
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+        return res.status(400).send({ message: "Invalid email or password.", success: false });
+    }
+
+    // 3. Generate JWT
+    // Use only the ID. Avoid putting the email in the payload if you don't need it (smaller token).
+    const jwtToken = jwt.sign(
+        { id: user._id }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '1h' }
+    );
+
+    res.status(200).send({ 
+        message: "Login successful!", 
+        success: true, 
+        token: jwtToken,
+        user: { id: user._id, name: user.name, email: user.email } // Return user info for frontend
+    });
+
+} catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal Server Error", success: false });
 }
+ }
 
 
 module.exports = {
