@@ -1,4 +1,4 @@
-import { createContext, useContext, useState,} from 'react'
+import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useAlert } from './AlertConext'
 
@@ -15,6 +15,7 @@ export interface RegisterData {
 export interface User {
   name: string
   email: string
+  token: string
 }
 export interface MagicLinkData {
   token: string
@@ -23,37 +24,60 @@ export interface MagicLinkData {
 
 interface AuthContextType {
   user: User | null
+  loading: boolean
   login: (LoginInfo: LoginData) => Promise<boolean>
   logout: () => void
   register: (RegisterInfo: RegisterData) => Promise<boolean>
   verifyMagicLink: (MagicLinkData: MagicLinkData) => Promise<boolean>
 }
-// ── Contexts ───────────────────────────────────────────
+
+// ── Storage Helpers ────────────────────────────────────
+const STORAGE_KEY = 'auth_user'
+
+const saveUser = (user: User) =>
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+
+const clearUser = () =>
+  localStorage.removeItem(STORAGE_KEY)
+
+const loadUser = (): User | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as User) : null
+  } catch {
+    return null
+  }
+}
+
+// ── Context ────────────────────────────────────────────
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  loading: false,
   login: async () => false,
   logout: () => {},
   register: async () => false,
-  verifyMagicLink: async () => false
+  verifyMagicLink: async () => false,
 })
 
 // ── Provider ───────────────────────────────────────────
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('ABC')
-    // return saved ? JSON.parse({"token"}) : null
-    return null
-  })
-
+  // Restore full user (including token) from localStorage on mount
+  const [user, setUser] = useState<User | null>(() => loadUser())
   const [loading, setLoading] = useState(false)
-  const BackendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
-  const {showAlert} = useAlert();
 
+  const BackendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api'
+  const { showAlert } = useAlert()
 
-  // ── Login ────────────────────────────────────────────
+  // ── Helper: persist & update user state ───────────────
+  const persistUser = (user: User) => {
+    setUser(user)
+    saveUser(user)
+  }
+
+  // ── Login ─────────────────────────────────────────────
   const login = async (data: LoginData): Promise<boolean> => {
+    setLoading(true)
     try {
-      setLoading(true)
       const res = await fetch(`${BackendUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,35 +87,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const json = await res.json()
 
       if (!res.ok) {
-        showAlert(json.message || 'Login failed.','error')
+        showAlert(json.message || 'Login failed.', 'error')
         return false
       }
 
-      setUser(json.user)
+      // Expect backend to return { user: { name, email }, token: string }
+      // Merge token into the user object for a single source of truth
+      const loggedInUser: User = {
+        name: json.user.name,
+        email: json.user.email,
+        token: json.token ?? json.user.token,
+      }
 
-      localStorage.setItem('ABC', JSON.stringify(json.user.token))
-
-      showAlert(`Welcome back, ${json.user.name}!`,'success')
-
+      persistUser(loggedInUser)
+      showAlert(`Welcome back, ${loggedInUser.name}!`, 'success')
       return true
-
-    } catch (err) {
-      showAlert('Network error. Please try again.','error')
+    } catch {
+      showAlert('Network error. Please try again.', 'error')
       return false
     } finally {
       setLoading(false)
     }
   }
 
-  // ── Logout ───────────────────────────────────────────
+  // ── Logout ────────────────────────────────────────────
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('ABC')
-    showAlert('You have been logged out.','info')
+    clearUser()
+    showAlert('You have been logged out.', 'info')
   }
 
-
-  // ── Register ─────────────────────────────────────────
+  // ── Register ──────────────────────────────────────────
   const register = async (data: RegisterData): Promise<boolean> => {
     setLoading(true)
     try {
@@ -104,56 +130,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const json = await res.json()
 
       if (!res.ok) {
-        showAlert(json.message || 'Registration failed.','error')
+        showAlert(json.message || 'Registration failed.', 'error')
         return false
       }
 
-      showAlert('Registration successful! Please check your email to verify your account.','success')
-
+      showAlert(
+        'Registration successful! Please check your email to verify your account.',
+        'success'
+      )
       return true
-
-    } catch (err) {
-      showAlert('Network error. Please try again.','error')
+    } catch {
+      showAlert('Network error. Please try again.', 'error')
       return false
     } finally {
       setLoading(false)
     }
   }
 
-   // ── Verify Magic Link ─────────────────────────────────────────
+  // ── Verify Magic Link ─────────────────────────────────
+  const verifyMagicLink = async (data: MagicLinkData): Promise<boolean> => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${BackendUrl}/auth/verify-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
 
-   const verifyMagicLink = async (data: MagicLinkData): Promise<boolean> => {
-          try {
-        // NOW we call the backend API
-        const response = await fetch(`${BackendUrl}/auth/verify-signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+      const json = await res.json()
 
-        const responseJson = await response.json();
-
-        if (response.ok) {
-          showAlert("Email verified! ", "success");
-          localStorage.setItem('ABC', JSON.stringify(responseJson.token))
-          return true
-        } else {
-          showAlert(responseJson.message, "error");
-            return false
-        }
-      } catch (err) {
-        showAlert("Connection error", "error");
+      if (!res.ok) {
+        showAlert(json.message || 'Verification failed.', 'error')
         return false
       }
-   }
+
+      // Expect backend to return { user: { name, email }, token: string }
+      const verifiedUser: User = {
+        name: json.user?.name ?? '',
+        email: json.user?.email ?? data.email,
+        token: json.token ?? json.user?.token,
+      }
+
+      persistUser(verifiedUser)
+      showAlert('Email verified! You are now logged in.', 'success')
+      return true
+    } catch (err: any) {
+      showAlert('Connection error. Please try again.', 'error')
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-   
-      <AuthContext.Provider value={{ user, login, logout, register, verifyMagicLink}}>
-        {children}
-      </AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, login, logout, register, verifyMagicLink }}>
+      {children}
+    </AuthContext.Provider>
   )
 }
 
-// ── Hooks ──────────────────────────────────────────────
+// ── Hook ───────────────────────────────────────────────
 export const useAuth = () => useContext(AuthContext)

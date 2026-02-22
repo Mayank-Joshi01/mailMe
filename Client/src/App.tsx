@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import Alert from './components/Alert/Alert'
 import VerifyPage from './pages/VerifyPage'
+import NotFoundPage from './pages/404Page'
 
 // Protect routes — redirect to /login if not logged in
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -16,9 +17,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 // Redirect logged-in users away from login/register
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  // const { user } = useAuth()
-  // return user ? <Navigate to="/" replace /> : <>{children}</>
-  return <>{children}</>
+  const { user } = useAuth()
+  return user ? <Navigate to="/" replace /> : <>{children}</>
+
 }
 
 export default function App() {
@@ -56,16 +57,16 @@ export default function App() {
 
         {/* Private routes — with Navbar */}
         <Route path="/" element={
-          <PublicRoute>
+          <PrivateRoute>
             <>
               <Navbar />
               <HomePage />
             </>
-          </PublicRoute>
+          </PrivateRoute>
         } />
 
         {/* Catch all — redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
 
     </div>
