@@ -2,17 +2,16 @@ import { useState } from 'react'
 import { useAuth } from '../context/AppContext'
 import InputField from '../components/InputField'
 import Button from '../components/Button'
+import { useNavigate } from 'react-router'
 
-interface LoginPageProps {
-  onNavigate: (page: 'home' | 'login' | 'register') => void
-}
-
-export default function LoginPage({ onNavigate }: LoginPageProps) {
+export default function LoginPage() {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,14 +23,14 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
       const name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
       login({ name, email })
       setLoading(false)
-      onNavigate('home')
+      navigate('/')
     }, 800)
   }
 
   // Replace this with real Google OAuth when ready
   const handleGoogleLogin = () => {
     login({ name: 'Google User', email: 'googleuser@gmail.com' })
-    onNavigate('home')
+    navigate('/')
   }
 
   return (
@@ -76,7 +75,7 @@ export default function LoginPage({ onNavigate }: LoginPageProps) {
           
           <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-5">
             Don't have an account?{' '}
-            <button onClick={() => onNavigate('register')} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+            <button onClick={() => navigate('/register')} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
               Register
             </button>
           </p>

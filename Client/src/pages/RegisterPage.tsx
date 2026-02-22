@@ -2,12 +2,10 @@ import { useState } from 'react'
 import { useAuth } from '../context/AppContext'
 import InputField from '../components/InputField'
 import Button from '../components/Button'
+import { useNavigate } from 'react-router'
 
-interface RegisterPageProps {
-  onNavigate: (page: 'home' | 'login' | 'register') => void
-}
 
-export default function RegisterPage({ onNavigate }: RegisterPageProps) {
+export default function RegisterPage(){
   const { register } = useAuth()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -15,6 +13,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
   const [confirm, setConfirm] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
 
   const {showAlert} = useAuth();
 
@@ -38,7 +37,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
     setTimeout(() => {
       register({ name, email })
       setLoading(false)
-      onNavigate('home')
+      navigate("/");
       showAlert('Account created successfully!', 'success');
     }, 1000)
   }
@@ -94,7 +93,7 @@ export default function RegisterPage({ onNavigate }: RegisterPageProps) {
 
           <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-5">
             Already have an account?{' '}
-            <button onClick={() => onNavigate('login')} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+            <button onClick={() => navigate('/login')} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
               Login
             </button>
           </p>

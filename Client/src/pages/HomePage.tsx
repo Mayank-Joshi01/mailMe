@@ -2,13 +2,11 @@ import { useAuth } from '../context/AppContext'
 import UserCard from '../components/home/UserCard'
 import MailForm from '../components/home/MailForm'
 import Button from '../components/Button'
+import { useNavigate } from 'react-router'
 
-interface HomePageProps {
-  onNavigate: (page: 'home' | 'login' | 'register') => void
-}
-
-export default function HomePage({ onNavigate }: HomePageProps) {
+export default function HomePage() {
   const { user } = useAuth()
+  const navigate = useNavigate();
 
   // Not logged in
   if (!user) {
@@ -21,8 +19,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           Please login or register to continue.
         </p>
         <div className="flex gap-3">
-          <Button onClick={() => onNavigate('login')}>Login</Button>
-          <Button variant="secondary" onClick={() => onNavigate('register')}>Register</Button>
+          <Button onClick={() => navigate('/login')}>Login</Button>
+          <Button variant="secondary" onClick={() => navigate('/register')}>Register</Button>
         </div>
       </div>
     )

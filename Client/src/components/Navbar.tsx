@@ -1,15 +1,13 @@
 import { useAuth } from '../context/AppContext'
+import { useNavigate } from 'react-router'
 
-interface NavbarProps {
-  onNavigate: (page: 'home' | 'login' | 'register') => void
-}
-
-export default function Navbar({ onNavigate }: NavbarProps) {
+export default function Navbar() {
   const { user, logout } = useAuth()
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout()
-    onNavigate('login')
+    navigate('/login')
   }
 
   return (
@@ -18,7 +16,7 @@ export default function Navbar({ onNavigate }: NavbarProps) {
 
         {/* Logo */}
         <button
-          onClick={() => onNavigate('home')}
+          onClick={() => navigate('/')}
           className="text-xl font-bold text-indigo-600 dark:text-indigo-400"
         >
           MyApp
@@ -45,13 +43,13 @@ export default function Navbar({ onNavigate }: NavbarProps) {
           ) : (
             <>
               <button
-                onClick={() => onNavigate('login')}
+                onClick={() => navigate('/login')}
                 className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 Login
               </button>
               <button
-                onClick={() => onNavigate('register')}
+                onClick={() => navigate('/register')}
                 className="px-3 py-1.5 rounded-lg text-sm font-medium
                   bg-indigo-600 text-white hover:bg-indigo-700"
               >
