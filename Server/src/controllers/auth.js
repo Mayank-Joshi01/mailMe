@@ -84,7 +84,7 @@ const Register = async (req, res) => {
 
 
 const VerifyMagicLink = async (req, res) => {
-    const { token, email } = req.query;
+    const { token, email } = req.body;
     const hash = crypto.createHash('sha256').update(token).digest('hex');
 
     console.log("Received token:", token);
@@ -124,7 +124,7 @@ const VerifyMagicLink = async (req, res) => {
     // Delete pending user record
     await PendingUser.deleteOne({ email });
 
-    res.status(200).send({ message: "Email verified! You can now log in.", success: true, token: jwtToken });
+    res.status(200).send({ message: "Email verified! .", success: true, token: jwtToken , user: { id: user._id, name: user.name, email: user.email } });
 }
 
 const Login = async (req, res) => {
