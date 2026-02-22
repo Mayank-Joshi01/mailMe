@@ -1,11 +1,11 @@
 // Frontend Code (VerifyPage.tsx)
 import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
-import { useAuth } from '../context/AppContext';
+import { useAlert } from '../context/AlertConext';
 
 export default function VerifyPage() {
   const [searchParams] = useSearchParams();
-  const { showAlert } = useAuth();
+  const { showAlert } = useAlert();
   const navigate = useNavigate();
 
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';

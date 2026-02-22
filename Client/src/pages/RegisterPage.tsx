@@ -15,9 +15,9 @@ export default function RegisterPage(){
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate();
-
   const {showAlert} = useAlert();
 
+  /// Validation function for form fields
   const validate = () => {
     const e: Record<string, string> = {}
     if (!name.trim()) e.name = 'Name is required.'
@@ -31,34 +31,30 @@ export default function RegisterPage(){
     return Object.keys(e).length === 0
   }
 
+/// Handles the registration process
+  const registerUser = async (name: string, email: string, password: string) => {
+    try {
+      const success = await register({ name, email, password })
+      if (success) {
+        navigate("/");
+      }
+    } catch (err: any) {
+      showAlert(err.response?.data?.message || 'Registration failed. Please try again.', 'error');
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  // const registerUser = async () => {
-  //   try {
-  //     await register({ name, email, password })
-  //     showAlert('Account created successfully!', 'success');
-  //     navigate("/");
-  //   } catch (err: any) {
-  //     showAlert(err.response?.data?.message || 'Registration failed. Please try again.', 'error');
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
+/// Form submission handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
-
     setLoading(true)
-    setTimeout(() => {
-      // register({ name, email })
-      setLoading(false)
-      navigate("/");
-      showAlert('Account created successfully!', 'success');
-    }, 1000)
+    registerUser(name, email, password);
   }
 
   // Replace with real Google OAuth when ready
   const handleGoogleRegister = async () => {
-
   }
 
   return (

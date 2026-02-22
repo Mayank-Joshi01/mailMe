@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AppContext'
+import { useAlert } from '../context/AlertConext'
 import InputField from '../components/InputField'
 import Button from '../components/Button'
 import { useNavigate } from 'react-router'
@@ -8,33 +9,50 @@ export default function LoginPage() {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const { showAlert } = useAlert()
 
-  const navigate = useNavigate();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    if (!email || !password) { setError('Please fill in all fields.'); return }
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
-    setLoading(true)
-    setTimeout(() => {
-      const name = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
-      login({ name, email })
-      setLoading(false)
-      navigate('/')
-    }, 800)
+  /// Validation function for form fields
+  const validate = () => {
+    const e: Record<string, string> = {}
+    if (!email.trim()) e.email = 'Email is required.'
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Enter a valid email.'
+    if (!password) e.password = 'Password is required.'
+    else if (password.length < 8) e.password = 'At least 8 characters.'
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
 
-  // Replace this with real Google OAuth when ready
-  const handleGoogleLogin = () => {
-    login({ name: 'Google User', email: 'googleuser@gmail.com' })
-    navigate('/')
+  /// Handles the login process
+  const loginUser = async (email: string, password: string) => {
+    try {
+      const success = await login({ email, password })
+      if (success) {
+        navigate('/')
+      }
+    } catch (err: any) {
+      showAlert(err.response?.data?.message || 'Login failed. Please try again.', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /// Form submission handler
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+    setLoading(true)
+    loginUser(email, password)
+  }
+
+  // Replace with real Google OAuth when ready
+  const handleGoogleLogin = async () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gray-50 dark:bg-gray-950">
       <div className="w-full max-w-sm">
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm">
 
@@ -46,22 +64,32 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <InputField label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} />
-            <InputField label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} />
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            <InputField label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} error={errors.email} />
+            <InputField label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} error={errors.password} />
+
+            <div className="flex justify-end -mt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
+
             <Button type="submit" disabled={loading} fullWidth>
               {loading ? 'Logging in...' : 'Login'}
             </Button>
           </form>
 
-          {/* ── Divider (new) ── */}
+          {/* ── Divider ── */}
           <div className="flex items-center gap-3 my-4">
             <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
             <span className="text-xs text-gray-400">or</span>
             <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
           </div>
 
-          {/* ── Google Button (new) ── */}
+          {/* ── Google Button ── */}
           <button
             onClick={handleGoogleLogin}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border
@@ -72,7 +100,7 @@ export default function LoginPage() {
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
             Continue with Google
           </button>
-          
+
           <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-5">
             Don't have an account?{' '}
             <button onClick={() => navigate('/register')} className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
