@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import InputField from '../InputField'
 import Button from '../Button'
+import { useMail } from '../../context/MailContext'
 
 export default function MailForm() {
   const [to, setTo] = useState('')
@@ -8,6 +9,7 @@ export default function MailForm() {
   const [message, setMessage] = useState('')
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+  const { sendMail } = useMail()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -16,7 +18,7 @@ export default function MailForm() {
       return
     }
     setError('')
-    setSent(true)
+    sendMail({ to, subject, body: message })
     setTo('')
     setSubject('')
     setMessage('')
