@@ -1,25 +1,30 @@
 import { Routes, Route, Navigate } from 'react-router'
 import { useAuth } from './context/AppContext'
 import { useAlert } from './context/AlertConext'
-import Navbar from './components/Navbar'
+import Alert from './Components/Alert/Alert'
+
+// Layout
+import MainLayout from './layout/MainLayout'
+
+// Pages
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
-import Alert from './components/Alert/Alert'
 import VerifyPage from './pages/VerifyPage'
 import NotFoundPage from './pages/404Page'
+import PricingPage from './pages/PricingPage'
+import DashboardPage from './pages/DashboardPage'
+import DocsPage from './pages/DocumentationPage'
+import ConsolePage from './pages/ConsolePage'
 
-// Protect routes — redirect to /login if not logged in
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   return user ? <>{children}</> : <Navigate to="/login" replace />
 }
 
-// Redirect logged-in users away from login/register
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   return user ? <Navigate to="/" replace /> : <>{children}</>
-
 }
 
 export default function App() {
@@ -27,49 +32,42 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-
-      {/* Global Alert */}
+      {/* Global Alert remains outside the routes to stay on top */}
       {alert.show && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4 z-100">
           <Alert type={alert.type} message={alert.message} />
         </div>
       )}
 
       <Routes>
-        {/* Public routes — no Navbar */}
-        <Route path="/login" element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        } />
+        {/* --- ROUTES WITHOUT NAVBAR --- */}
+        <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+        <Route path="/verify-signup" element={<PublicRoute><VerifyPage /></PublicRoute>} />
 
-        <Route path="/verify-signup" element={
-          <PublicRoute>
-            <VerifyPage />
-          </PublicRoute>
-        } />
+        {/* --- ROUTES WITH NAVBAR (Nested in MainLayout) --- */}
+        <Route element={<MainLayout />}>
+          {/* Open Routes (Anyone can see) */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/docs" element={<DocsPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
 
-        <Route path="/register" element={
-          <PublicRoute>
-            <RegisterPage />
-          </PublicRoute>
-        } />
+          {/* Protected Routes (Only logged in) */}
+          <Route path="/console" element={
+            <PrivateRoute>
+              <ConsolePage />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard" element={
+            <PrivateRoute>
+              <DashboardPage />
+            </PrivateRoute>
+          } />
+        </Route>
 
-        {/* Private routes — with Navbar */}
-        <Route path="/" element={
-          <PrivateRoute>
-            <>
-              <Navbar />
-              <HomePage />
-            </>
-          </PrivateRoute>
-        } />
-
-        {/* Catch all — redirect to home */}
+        {/* Catch all */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-
     </div>
-
   )
 }

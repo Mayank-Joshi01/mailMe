@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AppContext'
-import UserCard from '../components/home/UserCard'
-import MailForm from '../components/home/MailForm'
-import Button from '../components/Button'
+import UserCard from '../Components/home/UserCard'
+import MailForm from '../Components/home/MailForm'
+import Button from '../Components/Button'
 import { useNavigate } from 'react-router'
 
 export default function HomePage() {
@@ -11,9 +11,9 @@ export default function HomePage() {
   // Not logged in
   if (!user) {
     return (
-      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 text-center px-4">
+      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 text-center px-4 w-full">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Welcome to MyApp
+          Welcome to PostDrop
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
           Please login or register to continue.
@@ -32,7 +32,7 @@ export default function HomePage() {
       <UserCard />
 
       {/* Gallery + Mail form side by side on larger screens */}
-      <div className="">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <MailForm />
       </div>

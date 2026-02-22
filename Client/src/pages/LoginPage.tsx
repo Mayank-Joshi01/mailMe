@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AppContext'
 import { useAlert } from '../context/AlertConext'
-import InputField from '../components/InputField'
-import Button from '../components/Button'
+import InputField from '../Components/InputField'
+import Button from '../Components/Button'
 import { useNavigate } from 'react-router'
 
 export default function LoginPage() {

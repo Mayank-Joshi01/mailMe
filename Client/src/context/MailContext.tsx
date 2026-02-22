@@ -145,15 +145,15 @@ export function MailProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // ── Auto-fetch when user logs in ──────────────────────
-  useEffect(() => {
-    if (user) {
-      fetchSentMails()
-    } else {
-      // Clear mails when user logs out
-      setSentMails([])
-    }
-  }, [user])
+  // // ── Auto-fetch when user logs in ──────────────────────
+  // useEffect(() => {
+  //   if (user) {
+  //     fetchSentMails()
+  //   } else {
+  //     // Clear mails when user logs out
+  //     setSentMails([])
+  //   }
+  // }, [user])
 
   return (
     <MailContext.Provider
