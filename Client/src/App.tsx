@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router'
 import { useAuth } from './context/AppContext'
+import { useAlert } from './context/AlertConext'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -20,7 +21,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { alert } = useAuth()
+  const { alert } = useAlert()
 
   return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950">

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AppContext'
+import { useAlert } from '../context/AlertConext'
 import InputField from '../components/InputField'
 import Button from '../components/Button'
 import { useNavigate } from 'react-router'
@@ -15,7 +16,7 @@ export default function RegisterPage(){
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate();
 
-  const {showAlert} = useAuth();
+  const {showAlert} = useAlert();
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -30,12 +31,25 @@ export default function RegisterPage(){
     return Object.keys(e).length === 0
   }
 
+
+  // const registerUser = async () => {
+  //   try {
+  //     await register({ name, email, password })
+  //     showAlert('Account created successfully!', 'success');
+  //     navigate("/");
+  //   } catch (err: any) {
+  //     showAlert(err.response?.data?.message || 'Registration failed. Please try again.', 'error');
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
+
     setLoading(true)
     setTimeout(() => {
-      register({ name, email })
+      // register({ name, email })
       setLoading(false)
       navigate("/");
       showAlert('Account created successfully!', 'success');
