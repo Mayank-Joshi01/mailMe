@@ -8,9 +8,12 @@ export default function VerifyPage() {
   const { showAlert } = useAuth();
   const navigate = useNavigate();
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   useEffect(() => {
     const verifyToken = async () => {
       const token = searchParams.get('token');
+      const email = searchParams.get('email');
 
       if (!token) {
         showAlert("Invalid link", "error");
@@ -19,17 +22,17 @@ export default function VerifyPage() {
 
       try {
         // NOW we call the backend API
-        const response = await fetch(`http://localhost:5000/api/auth/verify-link`, {
+        const response = await fetch(`${API_URL}/api/auth/verify-signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
+          body: JSON.stringify({ token, email })
         });
 
         const data = await response.json();
 
         if (response.ok) {
-          showAlert("Email verified! You can now login.", "success");
-          navigate('/login');
+          showAlert("Email verified! ", "success");
+          navigate('/');
         } else {
           showAlert(data.message, "error");
         }
