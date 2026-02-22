@@ -1,43 +1,36 @@
 // Frontend Code (VerifyPage.tsx)
-import { useEffect } from 'react';
+import { useEffect , useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { useAlert } from '../context/AlertConext';
+import { useAuth } from '../context/AppContext';
+
 
 export default function VerifyPage() {
   const [searchParams] = useSearchParams();
-  const { showAlert } = useAlert();
+  const hasFetched = useRef(false); // 1. Create a flag
   const navigate = useNavigate();
-
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const { showAlert } = useAlert();
+  const { verifyMagicLink } = useAuth();
 
   useEffect(() => {
+    // 2. Check if we've already started the request
+    if (hasFetched.current) return;
+    hasFetched.current = true; 
+
     const verifyToken = async () => {
       const token = searchParams.get('token');
       const email = searchParams.get('email');
 
-      if (!token) {
+      if (!token || !email) {
         showAlert("Invalid link", "error");
         return navigate('/login');
       }
 
-      try {
-        // NOW we call the backend API
-        const response = await fetch(`${API_URL}/api/auth/verify-signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, email })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          showAlert("Email verified! ", "success");
-          navigate('/');
-        } else {
-          showAlert(data.message, "error");
-        }
-      } catch (err) {
-        showAlert("Connection error", "error");
+      const result = await verifyMagicLink({ token, email });
+      if (result) {
+        navigate('/');
+      } else {
+        navigate('/login');
       }
     };
 

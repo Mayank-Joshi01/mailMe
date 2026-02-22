@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import Alert from './components/Alert/Alert'
+import VerifyPage from './pages/VerifyPage'
 
 // Protect routes — redirect to /login if not logged in
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -24,44 +25,50 @@ export default function App() {
   const { alert } = useAlert()
 
   return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
 
-        {/* Global Alert */}
-        {alert.show && (
-          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
-            <Alert type={alert.type} message={alert.message} />
-          </div>
-        )}
+      {/* Global Alert */}
+      {alert.show && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+          <Alert type={alert.type} message={alert.message} />
+        </div>
+      )}
 
-        <Routes>
-          {/* Public routes — no Navbar */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          } />
+      <Routes>
+        {/* Public routes — no Navbar */}
+        <Route path="/login" element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        } />
 
-          <Route path="/register" element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          } />
+        <Route path="/verify-signup" element={
+          <PublicRoute>
+            <VerifyPage />
+          </PublicRoute>
+        } />
 
-          {/* Private routes — with Navbar */}
-          <Route path="/" element={
-            <PublicRoute>
-              <>
-                <Navbar />
-                <HomePage />
-              </>
-            </PublicRoute>
-          } />
+        <Route path="/register" element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        } />
 
-          {/* Catch all — redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        {/* Private routes — with Navbar */}
+        <Route path="/" element={
+          <PublicRoute>
+            <>
+              <Navbar />
+              <HomePage />
+            </>
+          </PublicRoute>
+        } />
 
-      </div>
+        {/* Catch all — redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+
+    </div>
 
   )
 }

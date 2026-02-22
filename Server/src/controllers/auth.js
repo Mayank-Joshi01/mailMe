@@ -29,7 +29,7 @@ async function generateMagicLink(userEmail) {
     });
 
     // 5. Return the raw token to be sent in the email
-    return `http://localhost:5000/api/auth/verify-signup?token=${rawToken}&email=${userEmail}`;
+    return `${process.env.FRONTEND_URL}/verify-signup?token=${rawToken}&email=${userEmail}`;
 }
 
 

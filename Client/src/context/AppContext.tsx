@@ -16,12 +16,17 @@ export interface User {
   name: string
   email: string
 }
+export interface MagicLinkData {
+  token: string
+  email: string
+}
 
 interface AuthContextType {
   user: User | null
   login: (LoginInfo: LoginData) => Promise<boolean>
   logout: () => void
   register: (RegisterInfo: RegisterData) => Promise<boolean>
+  verifyMagicLink: (MagicLinkData: MagicLinkData) => Promise<boolean>
 }
 // ── Contexts ───────────────────────────────────────────
 const AuthContext = createContext<AuthContextType>({
@@ -29,13 +34,15 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => false,
   logout: () => {},
   register: async () => false,
+  verifyMagicLink: async () => false
 })
 
 // ── Provider ───────────────────────────────────────────
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('ABC')
-    return saved ? JSON.parse(saved) : null
+    // return saved ? JSON.parse({"token"}) : null
+    return null
   })
 
   const [loading, setLoading] = useState(false)
@@ -62,7 +69,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setUser(json.user)
 
-      localStorage.setItem('ABC', JSON.stringify(json.user))
+      localStorage.setItem('ABC', JSON.stringify(json.user.token))
 
       showAlert(`Welcome back, ${json.user.name}!`,'success')
 
@@ -101,9 +108,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return false
       }
 
-      setUser(json.user)
-      localStorage.setItem('ABC', JSON.stringify(json.user))
-      showAlert(`Account created! Welcome, ${json.user.name}!`,'success')
+      showAlert('Registration successful! Please check your email to verify your account.','success')
+
       return true
 
     } catch (err) {
@@ -114,10 +120,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
+   // ── Verify Magic Link ─────────────────────────────────────────
+
+   const verifyMagicLink = async (data: MagicLinkData): Promise<boolean> => {
+          try {
+        // NOW we call the backend API
+        const response = await fetch(`${BackendUrl}/auth/verify-signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const responseJson = await response.json();
+
+        if (response.ok) {
+          showAlert("Email verified! ", "success");
+          localStorage.setItem('ABC', JSON.stringify(responseJson.token))
+          return true
+        } else {
+          showAlert(responseJson.message, "error");
+            return false
+        }
+      } catch (err) {
+        showAlert("Connection error", "error");
+        return false
+      }
+   }
 
   return (
    
-      <AuthContext.Provider value={{ user, login, logout, register}}>
+      <AuthContext.Provider value={{ user, login, logout, register, verifyMagicLink}}>
         {children}
       </AuthContext.Provider>
   )
