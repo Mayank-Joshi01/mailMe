@@ -1,7 +1,7 @@
 const Router = require('express').Router();
 const cors = require('cors');
 
-const { SubmitForm } = require('../controllers/form');
+const { SubmitForm } = require('../controllers/submission');
 
 // This handles the "Is it okay if I send a POST?" question from the browser
 Router.options('/submit', cors({origin:'*'}));

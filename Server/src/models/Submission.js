@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
+    ObjectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project',
+        required: true
+    },
     name: {
         type: String,
         required: true
@@ -9,15 +14,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    RecipientEmail: {
-        type: String,
-        required: true,
-    },
-    Subject: {
-        type: String,
-        required: true,
-    },
-    Body: { 
+    message: { 
         type: String,
         required: true,
     },
