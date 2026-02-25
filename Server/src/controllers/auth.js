@@ -32,7 +32,6 @@ async function generateMagicLink(userEmail) {
     return `${process.env.FRONTEND_URL}/verify-signup?token=${rawToken}&email=${userEmail}`;
 }
 
-
 const Register = async (req, res) => {
     try {
         /// Gettigng data from req.body

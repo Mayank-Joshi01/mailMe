@@ -66,7 +66,14 @@ const updateProject = async (req, res) => {
             return res.status(401).json({ error: "You do not have permission to update this project." });
         }
 
-        // 3. Evaluate new data and check for changes
+        // 3. Check for existing project with the same name for this user (Optional but good UX) , Single DB Call
+        const existingProject = await Project.findOne({ name, ownerId: req.user.id });
+
+        if (existingProject && existingProject._id.toString() !== projectId) {
+                    return res.status(400).json({ error: "A project with this name already exists for the user." });
+        }
+
+        // 4. Evaluate new data and check for changes
         if (name) project.name = name;
         if (description) project.description = description;
         if (status) project.status = status;

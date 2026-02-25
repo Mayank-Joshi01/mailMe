@@ -3,6 +3,7 @@ const connectDB = require('./configs/db');
 // const mailRoutes = require('./routes/mail');
 const authRoutes = require('./routes/auth');
 const formRoutes = require('./routes/submission');
+const projectRoutes = require('./routes/project');
 const cors = require('cors');
 
 
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 // app.use('/api/mail', mailRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/form', formRoutes);
+app.use('/api/projects', projectRoutes);
 
 const PORT = process.env.PORT || 5000;
 
