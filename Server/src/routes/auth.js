@@ -18,16 +18,22 @@ const rateLimiter = rateLimit({
 const FrontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 const { Register, Login, VerifyMagicLink } = require("../controllers/auth");
+const { 
+    validateUserRegistration, 
+    validateUserLogin, 
+    validateUrl,
+    handleValidationErrors
+} = require('../middlewares/userValidator');
 
 Router.use(cors({ origin: FrontendURL }));
 
 // 1. Register Route - Generates magic link and sends email
-Router.post("/register", rateLimiter, Register);
+Router.post("/register", rateLimiter, validateUserRegistration, handleValidationErrors, Register);
 
 // 2. Login Route - verifies credentials and generate JWT token
-Router.post("/login",  rateLimiter, Login);
+Router.post("/login",  rateLimiter, validateUserLogin, handleValidationErrors, Login);
 
 // 3. Verify Magic Link Route - Verifies magic url creates user session and generates JWT 
-Router.post("/verify-signup", rateLimiter ,VerifyMagicLink);
+Router.post("/verify-signup", rateLimiter, validateUrl, handleValidationErrors, VerifyMagicLink);
 
 module.exports = Router;
