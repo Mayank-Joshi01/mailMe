@@ -16,7 +16,7 @@ export default function MainLayout() {
         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} 
       />
       
-      <div className="flex flex-1">
+      <div className="flex flex-1 ">
         {/* The Outlet passes the sidebar state down to child routes */}
         <Outlet context={{ isSidebarOpen, setIsSidebarOpen }} />
       </div>

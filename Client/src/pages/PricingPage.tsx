@@ -3,7 +3,7 @@ import PricingGrid from '../Components/Pricing/PricingGrid'
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center px-4 py-16 w-full">
+    <div className="min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center w-full">
 
       <PricingHeader />
 
