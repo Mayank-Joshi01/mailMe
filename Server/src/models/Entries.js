@@ -6,6 +6,11 @@ const UserSchema = new mongoose.Schema({
         ref: 'Project',
         required: true
     },
+    UserId : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     name: {
         type: String,
         required: true
@@ -24,4 +29,4 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Mail", UserSchema);
+module.exports = mongoose.model("Entries", UserSchema);
