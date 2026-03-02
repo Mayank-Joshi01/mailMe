@@ -33,7 +33,7 @@ export default function DocsPage() {
       {/* Note: Margin changed to lg:ml-64 to match standard sidebar width */}
       <main className="flex-1 lg:ml-64 min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-950 transition-all duration-300">
         <div className="max-w-4xl mx-auto p-6 sm:p-10">
-          <DocsContent activeId={activeId} />
+          <DocsContent activeId={activeId}  onNavigate={(id) => setActiveId(id)} />
         </div>
       </main>
 

@@ -2,10 +2,11 @@ import { docsContent } from './docsData'
 import DocsSection from './DocsSection'
 
 interface DocsContentProps {
-  activeId: string
+  activeId: string,
+  onNavigate?: (id: string) => void
 }
 
-export default function DocsContent({ activeId }: DocsContentProps) {
+export default function DocsContent({ activeId, onNavigate }: DocsContentProps) {
   const content = docsContent[activeId]
 
   if (!content) {
@@ -23,7 +24,7 @@ export default function DocsContent({ activeId }: DocsContentProps) {
       />
 
       {/* Prev / Next buttons */}
-      <PrevNext activeId={activeId} />
+      <PrevNext activeId={activeId} onNavigate={onNavigate} />
     </div>
   )
 }
@@ -31,7 +32,7 @@ export default function DocsContent({ activeId }: DocsContentProps) {
 // ── Prev / Next ────────────────────────────────────────
 import { docsSections } from './docsData'
 
-function PrevNext({ activeId }: { activeId: string }) {
+function PrevNext({ activeId, onNavigate }: { activeId: string, onNavigate?: (id: string) => void }) {
   // Flatten all subtitles into a single list
   const allItems = docsSections.flatMap(s => s.subtitles)
   const currentIndex = allItems.findIndex(item => item.id === activeId)
@@ -39,17 +40,23 @@ function PrevNext({ activeId }: { activeId: string }) {
   const prev = allItems[currentIndex - 1] ?? null
   const next = allItems[currentIndex + 1] ?? null
 
+  const handleNavigation = (id: string) => {
+    onNavigate && onNavigate(id);
+    // Optional: Scroll to top when changing sections
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
       {prev ? (
-        <div className="text-sm">
+        <div className="text-sm cursor-pointer" onClick={() => handleNavigation(prev.id)}>
           <p className="text-gray-400 text-xs mb-0.5">Previous</p>
           <span className="text-indigo-600 dark:text-indigo-400 font-medium">← {prev.label}</span>
         </div>
       ) : <div />}
 
       {next ? (
-        <div className="text-sm text-right">
+        <div className="text-sm text-right cursor-pointer" onClick={() => handleNavigation(next.id)}>
           <p className="text-gray-400 text-xs mb-0.5">Next</p>
           <span className="text-indigo-600 dark:text-indigo-400 font-medium">{next.label} →</span>
         </div>
