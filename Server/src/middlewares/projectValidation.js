@@ -18,7 +18,7 @@ const validateDomainFormat = (value) => {
 
     // 3. Regex to match valid domains OR localhost (with optional port for frontend testing)
     // Matches: "example.com", "sub.example.co.uk", "localhost", "localhost:5173"
-    const domainRegex = /^([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|localhost(:\d{1,5})?)$/;
+  const domainRegex = /^([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|localhost(:\d{1,5})?|127.0.0.1(:\d{1,5})?)$/;   
     
     if (!domainRegex.test(value)) {
         throw new Error('Must be a valid domain name (e.g., "mywebsite.com" or "localhost:5173")');
