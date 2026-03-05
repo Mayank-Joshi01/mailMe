@@ -1,14 +1,15 @@
-const Entries = require('../models/entries');
-const Projects = require('../models/project');
+const Entries = require('../models/Entries');
+const Projects = require('../models/Project');
 const { sendEmail } = require("../Services/Mail");
 const { getSubmissionEmailTemplate } = require("../utils/mailTemplate");
+let UserSummary = require("../models/Summary");
 
 const EntriesSubmission = async (req, res) => {
     try {
         const publicId = req.headers['publicid'];
 
         // 2. Project Verification
-        const project = await Projects.findOne({ publicId }).lean(); // .lean() for faster read-only
+        const project = await Projects.findOne({ publicId }) // .lean() for faster read-only
 
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
@@ -34,6 +35,12 @@ const EntriesSubmission = async (req, res) => {
 
         await Promise.all([
             newEntry.save(),
+            UserSummary = UserSummary.findOneAndUpdate(
+                { UserId: project.ownerId },
+                { $inc: { totalEntries: 1 } },
+                { new: true, upsert: true }
+            ).exec(), // Add .exec() to make it a proper promise
+            project.updateOne({ $inc: { totalEntries: 1 } }), // Increment totalEntries in the project
             sendEmail(
                 project.targetEmail, 
                 "New Entry Submitted", 
@@ -113,8 +120,17 @@ const DeleteEntries = async (req, res) => {
             return res.status(403).json({ message: "Unauthorized to delete these entries" });
         }
 
+        const totalEntriesToDelete = project.totalEntries;
+
         // 2. Performance: DeleteMany is faster than looping through IDs
         const result = await Entries.deleteMany({ ProjectId: projectId });
+
+        // 3. Update the UserSummary totalEntries count
+        await UserSummary.findOneAndUpdate(
+            { UserId: project.ownerId },
+            { $inc: { totalEntries: -totalEntriesToDelete } },
+            { new: true }
+        );
 
         res.status(200).json({
             success: true,

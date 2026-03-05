@@ -31,7 +31,6 @@ const validateDomainFormat = (value) => {
 // Validation rules for Creating a project
 const validateCreateProject = [
     body('name', 'Project name is required').notEmpty().trim().escape(),
-    body('targetEmail', 'A valid target email is required').isEmail().normalizeEmail(),
     body('allowedDomain').optional().trim().custom(validateDomainFormat),
     body('description').optional().trim().escape()
 ];
@@ -39,7 +38,6 @@ const validateCreateProject = [
 // Validation rules for Updating a project
 const validateUpdateProject = [
     body('name', 'Project name cannot be empty').optional().notEmpty().trim().escape(),
-    body('targetEmail', 'Must be a valid email').optional().isEmail().normalizeEmail(),
     body('allowedDomain').optional().trim().custom(validateDomainFormat),
     body('status', 'Invalid status').optional().isIn(['active', 'inactive'])
 ];

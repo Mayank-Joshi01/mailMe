@@ -3,6 +3,7 @@ const connectDB = require('./configs/db');
 const authRoutes = require('./routes/auth');
 const Entries = require('./routes/entries');
 const projectRoutes = require('./routes/project');
+const summaryRoutes = require('./routes/summary');
 
 
 const app = express();
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/entries', Entries);
 app.use('/api/projects', projectRoutes);
+app.use('/api/summary', summaryRoutes);
 
 const PORT = process.env.PORT || 5000;
 

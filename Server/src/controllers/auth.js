@@ -5,6 +5,7 @@ const PendingUser = require("../models/PendingUse");
 const bcrypt = require('bcryptjs');
 const { sendEmail } = require("../Services/Mail");
 const jwt = require("jsonwebtoken");
+const userSummary = require("../models/Summary");
 require("dotenv").config();
 
 // Helper function to generate and store magic link token
@@ -53,7 +54,7 @@ const Register = async (req, res) => {
         const token = await generateMagicLink(email);
 
         // 4. Send the magic link via email
-        await sendEmail(email, "Verification Link for MailMe", `<p>Click the link below to verify your email and complete registration:</p><a href="${token}">Verify Email</a>`);
+        await sendEmail(email, "Verification Link for MailMe", `<p>Click the Verify Email  below to verify your email and complete registration:</p><a href="${token}">Verify Email</a>`);
 
 
         const tokenHash = token.split('?token=')[1].split('&email=')[0]
@@ -86,9 +87,6 @@ const VerifyMagicLink = async (req, res) => {
     const { token, email } = req.body;
     const hash = crypto.createHash('sha256').update(token).digest('hex');
 
-    console.log("Received token:", token);
-    console.log("email:", email);
-
     // Find valid, non-expired token
     const tokenRecord = await Token.findOne({
         email,
@@ -116,6 +114,11 @@ const VerifyMagicLink = async (req, res) => {
         password: pendingUser.password
     });
 
+    // Create a default summary for the new user
+    await userSummary.create({
+        UserId: user._id,
+    });
+
     // Create Session or JWT here if you want to log them in immediately
     const jwtToken = jwt.sign({ email: user.email , id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
@@ -123,7 +126,7 @@ const VerifyMagicLink = async (req, res) => {
     // Delete pending user record
     await PendingUser.deleteOne({ email });
 
-    res.status(200).send({ message: "Email verified! .", success: true, token: jwtToken , user: { id: user._id, name: user.name, email: user.email } });
+    res.status(200).send({ message: "Email verified! .", success: true, token: jwtToken , user: { name: user.name, email: user.email } });
 }
 
 const Login = async (req, res) => {
@@ -150,7 +153,7 @@ try {
     // 3. Generate JWT
     // Use only the ID. Avoid putting the email in the payload if you don't need it (smaller token).
     const jwtToken = jwt.sign(
-        { id: user._id }, 
+        { email: user.email, id: user._id }, 
         process.env.JWT_SECRET, 
         { expiresIn: '1h' }
     );
@@ -159,7 +162,7 @@ try {
         message: "Login successful!", 
         success: true, 
         token: jwtToken,
-        user: { id: user._id, name: user.name, email: user.email } // Return user info for frontend
+        user: { name: user.name, email: user.email } // Return user info for frontend
     });
 
 } catch (error) {

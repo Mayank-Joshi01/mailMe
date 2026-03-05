@@ -1,5 +1,6 @@
 const Project = require("../models/Project");
 const crypto = require('crypto');
+const UserSummary = require("../models/Summary");
 
 
 // 1. Get All Projects (Read)
@@ -16,29 +17,44 @@ const fetchAllProjects = async (req, res) => {
 
 // 2. Create a New Project (Create)
 const createProject = async (req, res) => {
-    const { name, description, allowedDomain, targetEmail } = req.body;
+    const { name, description, allowedDomain } = req.body;
+
+    // Update user summary
+    const userSummary = await UserSummary.findOne({ UserId: req.user.id });
+
+    if (userSummary.totalProjects >= 10) {
+        return res.status(400).json({ error: "Project limit reached. You cannot create more than 10 projects." });
+    }
+
     try {
         // 1. Check for existing project with the same name for this user (Optional but good UX) , Single DB Call
         const existingProject = await Project.findOne({ name, ownerId: req.user.id });
 
         if (existingProject) {
-                    return res.status(400).json({ error: "A project with this name already exists for the user." });
+            return res.status(400).json({ error: "A project with this name already exists for the user." });
         }
 
         // Generate 8 random bytes and convert to hex (16 characters total)
         const publicId = crypto.randomBytes(8).toString('hex');
 
         const project = new Project({
-            name, 
-            description, 
+            name,
+            description,
             allowedDomain,
-            targetEmail,
+            targetEmail: req.user.email, // Set targetEmail to the email of the logged-in user
             publicId,
             ownerId: req.user.id
         });
 
         // 2. Save the new project to the database (Second DB Call)
         const savedProject = await project.save();
+
+
+        // if (userSummary) {
+        userSummary.totalProjects += 1;
+        userSummary.activeProjects += 1;
+        await userSummary.save();
+        // }
 
         res.json(savedProject);
 
@@ -50,7 +66,7 @@ const createProject = async (req, res) => {
 
 // 3. Update an Existing Project (Update)
 const updateProject = async (req, res) => {
-    const { name, description, allowedDomain, targetEmail, status } = req.body;
+    const { name, description, allowedDomain, status } = req.body;
     const projectId = req.params.id;
 
     try {
@@ -70,29 +86,58 @@ const updateProject = async (req, res) => {
         const existingProject = await Project.findOne({ name, ownerId: req.user.id });
 
         if (existingProject && existingProject._id.toString() !== projectId) {
-                    return res.status(400).json({ error: "A project with this name already exists for the user." });
+            return res.status(400).json({ error: "A project with this name already exists for the user." });
         }
 
         // 4. Evaluate new data and check for changes
         if (name) project.name = name;
         if (description) project.description = description;
-        if (status) project.status = status;
+        
 
         // Check if domain or email are provided AND are actually different
         const domainChanged = allowedDomain && allowedDomain !== project.allowedDomain;
-        const emailChanged = targetEmail && targetEmail !== project.targetEmail;
 
-        if (domainChanged || emailChanged) {
+        if (domainChanged) {
             if (allowedDomain) project.allowedDomain = allowedDomain;
-            if (targetEmail) project.targetEmail = targetEmail;
-            
+
             // Regenerate publicId
             project.publicId = crypto.randomBytes(8).toString('hex');
         }
 
+        // Update user summary if project status changes
+        if (status && status !== project.status) {
+            let updateFields = {};
+
+            if (status === "active" && project.status === "inactive") {
+                // Switching Inactive -> Active
+                updateFields = {
+                    $inc: { activeProjects: 1 }
+                };
+            } else if (status === "inactive" && project.status === "active") {
+                // Switching Active -> Inactive
+                updateFields = {
+                    $inc: { activeProjects: -1 }
+                };
+            }
+
+            if (Object.keys(updateFields).length > 0) {
+                await UserSummary.findOneAndUpdate(
+                    { UserId: req.user.id },
+                    updateFields,
+                    { upsert: true, new: true }
+                );
+                console.log(`Summary updated: ${status} transition complete.`);
+            }
+        }
+
+
+        /// Update project status if provided
+        if (status) project.status = status;
+        
         // 4. Save the updated project (Second DB Call)
         const updatedProject = await project.save();
-        
+
+
         res.json({ project: updatedProject });
 
     } catch (error) {
@@ -103,7 +148,7 @@ const updateProject = async (req, res) => {
 
 // 4. Delete a Project (Delete)
 const deleteProject = async (req, res) => {
-            const projectId = req.params.id;
+    const projectId = req.params.id;
     try {
         // 1. Find the project first (Single DB Call)
         let project = await Project.findById(projectId);
@@ -120,7 +165,15 @@ const deleteProject = async (req, res) => {
         // 3. Delete the project (Second DB Call)
         const deletedProject = await Project.findByIdAndDelete(projectId);
 
-        // 4. Return success message with deleted project info
+        // 4. Update user summary
+        const userSummary = await UserSummary.findOne({ UserId: req.user.id });
+        if (userSummary) {
+            userSummary.totalProjects -= 1;
+            userSummary.activeProjects = deletedProject.status === "active" ? userSummary.activeProjects - 1 : userSummary.activeProjects;
+            await userSummary.save();
+        }
+
+        // 5. Return success message with deleted project info
         res.json({ project: deletedProject });
 
     } catch (error) {
