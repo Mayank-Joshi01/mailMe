@@ -2,7 +2,7 @@
 import { useEffect , useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import { useAlert } from '../context/AlertConext';
-import { useAuth } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 
 
 export default function VerifyPage() {

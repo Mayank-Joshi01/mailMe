@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAuth } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 import { mockProjects } from '../Components/Console/consoleData'
 import ConsoleHeader from '../Components/Console/ConsoleHeader'
 import StatsBar from '../Components/Console/StatsBar'

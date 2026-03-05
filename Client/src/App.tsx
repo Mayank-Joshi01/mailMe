@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router'
-import { useAuth } from './context/AppContext'
+import { useAuth } from './context/AuthContext'
 import { useAlert } from './context/AlertConext'
 import Alert from './Components/Alert/Alert'
 
