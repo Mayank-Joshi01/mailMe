@@ -13,7 +13,6 @@ import RegisterPage from './pages/RegisterPage'
 import VerifyPage from './pages/VerifyPage'
 import NotFoundPage from './pages/404Page'
 import PricingPage from './pages/PricingPage'
-import DashboardPage from './pages/DashboardPage'
 import DocsPage from './pages/DocumentationPage'
 import ConsolePage from './pages/ConsolePage'
 
@@ -56,11 +55,6 @@ export default function App() {
           <Route path="/console" element={
             <PrivateRoute>
               <ConsolePage />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard" element={
-            <PrivateRoute>
-              <DashboardPage />
             </PrivateRoute>
           } />
         </Route>

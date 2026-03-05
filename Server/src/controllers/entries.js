@@ -1,24 +1,10 @@
 const Entries = require('../models/entries');
 const Projects = require('../models/project');
 const { sendEmail } = require("../Services/Mail");
-const { z } = require('zod'); // Recommended: npm install zod
-
-// Define a schema for validation
-const entrySchema = z.object({
-    userName: z.string().min(2).max(50),
-    userEmail: z.email(),
-    userMessage: z.string().min(1).max(2000),
-});
+const { getSubmissionEmailTemplate } = require("../utils/mailTemplate");
 
 const EntriesSubmission = async (req, res) => {
     try {
-        // 1. Validation: Ensure input is clean before doing anything else
-        const validation = entrySchema.safeParse(req.body);
-        if (!validation.success) {
-            return res.status(400).json({ errors: validation.error.message});
-        }
-
-        const { userName, userEmail, userMessage } = validation.data;
         const publicId = req.headers['publicid'];
 
         // 2. Project Verification
@@ -43,9 +29,7 @@ const EntriesSubmission = async (req, res) => {
         const newEntry = new Entries({
             ProjectId: project._id,
             UserId: project.ownerId,
-            name: userName,
-            SenderEmail: userEmail,
-            message: userMessage
+            data: req.body
         });
 
         await Promise.all([
@@ -53,7 +37,7 @@ const EntriesSubmission = async (req, res) => {
             sendEmail(
                 project.targetEmail, 
                 "New Entry Submitted", 
-                `<b>Submission from ${userName}:</b><p>${userMessage}</p>`
+                getSubmissionEmailTemplate(project.name, req.body)
             )
         ]);
 

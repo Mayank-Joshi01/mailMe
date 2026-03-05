@@ -48,7 +48,6 @@ export default function Navbar({ showDocsToggle = false, onMenuToggle }: NavbarP
             <div className="hidden md:flex items-center gap-6">
               <NavButton onClick={() => navigate('/docs')} label="Docs" />
               <NavButton onClick={() => navigate('/pricing')} label="Pricing" />
-              {user && <NavButton onClick={() => navigate('/dashboard')} label="Dashboard" />}
             </div>
           </div>
 

@@ -1,27 +1,21 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
+const EntrySchema = new mongoose.Schema({
     ProjectId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Project',
         required: true
     },
     UserId : {
-        type:mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    name: {
-        type: String,
-        required: true
-    },
-    SenderEmail: {
-        type: String,
+    // This allows ANY nested JSON structure
+    data: {
+        type: mongoose.Schema.Types.Mixed,
         required: true,
-    },
-    message: { 
-        type: String,
-        required: true,
+        default: {}
     },
     createdAt: {    
         type: Date,
@@ -29,4 +23,4 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Entries", UserSchema);
+module.exports = mongoose.model("Entries", EntrySchema);
