@@ -7,16 +7,16 @@
 // }
 
 export interface Project {
-    id: string;
+    _id: string;
     name: string;
     description: string;
+    publicId: string;
     allowedDomain: string;
+    targetEmail: string;
     status: string;
     totalEntries: number;
     createdAt: string;
-    publicId: string;
 }
-
 export interface UserSummaryData {
     totalProjects: number;
     totalEntries: number;

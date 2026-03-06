@@ -16,6 +16,9 @@ import PricingPage from './pages/PricingPage'
 import DocsPage from './pages/DocumentationPage'
 import ConsolePage from './pages/ConsolePage'
 import CreateProjectPage from './pages/CreateProjectPage'
+import EntriesPage from './pages/EntriesPage'
+import ProjectSettingsPage from './pages/ProjectSettingsPagae'
+import ConsoleLayout from './layout/ConsoleLayout'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
@@ -53,17 +56,30 @@ export default function App() {
           <Route path="/pricing" element={<PricingPage />} />
 
           {/* Protected Routes (Only logged in) */}
-          <Route path="/console" element={
+          <Route path="/console/" element={<ConsoleLayout />}>
+          <Route path="/console/" element={
             <PrivateRoute>
               <ConsolePage />
             </PrivateRoute>
           } />
-          <Route path="/create-project" element={
+          <Route path="/console/create-project" element={
             <PrivateRoute>
               <CreateProjectPage />
             </PrivateRoute>
           } />
+          <Route path="/console/project/:projectId" element={
+            <PrivateRoute>
+              <EntriesPage />
+            </PrivateRoute>
+          } />
+          <Route path="/console/project/:projectId/settings" element={
+            <PrivateRoute>
+              <ProjectSettingsPage />
+            </PrivateRoute>
+          } />
+          </Route>
         </Route>
+
 
         {/* Catch all */}
         <Route path="*" element={<NotFoundPage />} />

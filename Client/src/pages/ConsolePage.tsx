@@ -21,7 +21,7 @@ export default function DashboardPage() {
   }, []); 
 
   const handleNewProject = () => {
-    navigate('/create-project')
+    navigate('/console/create-project')
   }
   const OpenProject = (projectId: string) => {
     navigate(`/console/project/${projectId}`)

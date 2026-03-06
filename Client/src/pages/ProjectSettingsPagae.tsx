@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useState , useEffect } from 'react'
+import { useNavigate , useParams } from 'react-router'
 import NameInput from '../Components/Project/NameInput'
 import DomainInput from '../Components/Project/DomainInput'
 import DescriptionInput from '../Components/Project/DescriptionInput'
 import StatusInput from '../Components/Project/StatusInput'
 import FormActions from '../Components/Project/FormActions'
+import { useProjects } from '../context/ProjectContext'
 
 interface FormErrors {
   name?: string
@@ -12,23 +13,24 @@ interface FormErrors {
   description?: string
 }
 
-// Simulated existing project data
-// Replace with real data from your API / route params
-const existingProject = {
-  name:        'Contact Form',
-  domain:      'https://example.com',
-  description: 'Main contact form for the landing page.',
-  status:      'active' as const,
-}
-
-export default function EditProjectPage() {
+export default function ProjectSettingsPage() {
+  const { updateProject , fetchCurrentProject , currentProject } = useProjects() // Get updateProject from context
+  const { projectId } = useParams() // Get project ID from route params
   const navigate = useNavigate()
-  const [name, setName]               = useState(existingProject.name)
-  const [domain, setDomain]           = useState(existingProject.domain)
-  const [description, setDescription] = useState(existingProject.description)
-  const [status, setStatus]           = useState<'active' | 'inactive'>(existingProject.status)
+  const [name, setName]               = useState(currentProject?.name || '')
+  const [domain, setDomain]           = useState(currentProject?.allowedDomain || '')
+  const [description, setDescription] = useState(currentProject?.description || '')
+  const [status, setStatus]           = useState<'active' | 'inactive'>(currentProject?.status || 'active')
   const [errors, setErrors]           = useState<FormErrors>({})
   const [loading, setLoading]         = useState(false)
+
+ 
+ 
+  // Using useEffect to fetch current project details when component mounts
+  useEffect(() => {
+    fetchCurrentProject(projectId) // Fetch current project details using the ID from params
+  }, [fetchCurrentProject, projectId])
+
 
   const validate = (): boolean => {
     const e: FormErrors = {}

@@ -2,6 +2,7 @@ import type  { Project } from './consoleData'
 
 interface ProjectTableProps {
   projects: Project[]
+  OpenProject: (projectId: string) => void
 }
 
 function StatusBadge({ status }: { status: Project['status'] }) {
@@ -19,7 +20,7 @@ function StatusBadge({ status }: { status: Project['status'] }) {
   )
 }
 
-export default function ProjectTable({ projects }: ProjectTableProps) {
+export default function ProjectTable({ projects , OpenProject }: ProjectTableProps) {
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
 
@@ -36,8 +37,9 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
       <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {projects.map(project => (
           <div
-            key={project.id}
+            key={project._id}
             className="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer items-center"
+            onClick={() => OpenProject(project._id)}
           >
             {/* Name */}
             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">

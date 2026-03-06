@@ -8,7 +8,7 @@ const Entries = require('../models/Entries');
 const fetchAllProjects = async (req, res) => {
     try {
         // Find projects where the user matches the logged-in user ID
-        const projects = await Project.find({ ownerId: req.user.id });
+        const projects = await Project.find({ ownerId: req.user.id }).select('-__v -ownerId'); // Exclude __v and ownerId fields
         res.json(projects);
     } catch (error) {
         console.error(error.message);
