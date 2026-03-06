@@ -16,9 +16,9 @@ export default function DashboardPage() {
   const { projects, loading, error, fetchProjects } = useProjects()
   const { summary } = useSummary()
 
-  useEffect(() => {
-    fetchProjects();
-  }, []); 
+  // useEffect(() => {
+  //   fetchProjects();
+  // }, []); 
 
   const handleNewProject = () => {
     navigate('/console/create-project')

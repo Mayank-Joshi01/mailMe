@@ -98,7 +98,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
             await CreateProject(name, description, allowedDomain)
             showAlert('Project created successfully!', 'success')
-            await fetchProjects() // You can keep this for now, or update local state later
+            // await fetchProjects() // You can keep this for now, or update local state later
             return true
         } catch (err) {
             const errorMessage = getErrorMessage(err)
@@ -137,7 +137,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
             await UpdateProject(projectId, name, description, allowedDomain, status)
             showAlert('Project updated successfully!', 'success')
-            await fetchProjects()
+            // await fetchProjects()
             return true
         } catch (err) {
             const errorMessage = getErrorMessage(err)
