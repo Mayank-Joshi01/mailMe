@@ -17,10 +17,17 @@ const EntriesSubmission = async (req, res) => {
 
         // 3. Security Check: Domain Verification
         const origin = req.headers.origin;
-        if (!origin || !origin.includes(project.allowedDomain)) {
-             return res.status(403).json({ message: 'Unauthorized domain' });
+
+        // Reject if no origin exists (blocks direct Postman pings)
+        if (!origin) {
+            return res.status(403).json({ message: 'Unauthorized: Missing Origin header' });
         }
 
+        // ✅ Since both the DB and the incoming request have 'https://...', 
+        // we demand an absolute, perfect match.
+        if (origin !== project.allowedDomain) {
+            return res.status(403).json({ message: 'Unauthorized domain' });
+        }
         if (project.status !== 'active') {
             return res.status(403).json({ message: 'Project is inactive' });
         }
@@ -42,15 +49,15 @@ const EntriesSubmission = async (req, res) => {
             ).exec(), // Add .exec() to make it a proper promise
             project.updateOne({ $inc: { totalEntries: 1 } }), // Increment totalEntries in the project
             sendEmail(
-                project.targetEmail, 
-                "New Entry Submitted", 
+                project.targetEmail,
+                "New Entry Submitted",
                 getSubmissionEmailTemplate(project.name, req.body)
             )
         ]);
 
-        return res.status(201).json({ 
-            success: true, 
-            message: 'Form submitted successfully' 
+        return res.status(201).json({
+            success: true,
+            message: 'Form submitted successfully'
         });
 
     } catch (error) {
@@ -69,8 +76,8 @@ const GetEntries = async (req, res) => {
         const skip = (page - 1) * limit;
 
         // 1. Verify Project Ownership (Critical Security Step)
-        const project = await Projects.findOne({ 
-            _id: projectId, 
+        const project = await Projects.findOne({
+            _id: projectId,
             ownerId: req.user.id // Assumes you have auth middleware providing req.user
         });
 
@@ -107,4 +114,4 @@ const GetEntries = async (req, res) => {
     }
 };
 
-module.exports = { EntriesSubmission, GetEntries};
+module.exports = { EntriesSubmission, GetEntries };

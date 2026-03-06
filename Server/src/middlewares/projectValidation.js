@@ -3,28 +3,27 @@ const { body, validationResult } = require('express-validator');
 
 // Custom reusable function for domain validation
 const validateDomainFormat = (value) => {
-    // If empty, let the .optional() chain handle it
     if (!value) return true; 
 
-    // 1. Reject any slashes (blocks paths and trailing slashes)
-    if (value.includes('/')) {
-        throw new Error('Domain must not contain slashes (e.g., use "example.com" instead of "example.com/")');
+    // 1. Instantly reject if they forgot the protocol
+    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+        throw new Error('Domain must include http:// or https:// (e.g., "https://example.com")');
     }
 
-    // 2. Reject protocols (blocks http:// and https://)
-    if (value.includes('://')) {
-        throw new Error('Domain must not include http:// or https:// (e.g., use "example.com")');
+    // 2. Strip the protocol temporarily just to check for illegal paths/slashes
+    const withoutProtocol = value.replace(/^https?:\/\//, '');
+    if (withoutProtocol.includes('/')) {
+        throw new Error('Domain must not contain paths or trailing slashes (e.g., use "https://example.com")');
     }
 
-    // 3. Regex to match valid domains OR localhost (with optional port for frontend testing)
-    // Matches: "example.com", "sub.example.co.uk", "localhost", "localhost:5173"
-  const domainRegex = /^([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|localhost(:\d{1,5})?|127.0.0.1(:\d{1,5})?)$/;   
+    // 3. Strict Regex enforcing protocol, valid domain/IP, and optional port
+    const domainRegex = /^https?:\/\/(([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|localhost|(\d{1,3}\.){3}\d{1,3})(:\d{1,5})?$/;   
     
     if (!domainRegex.test(value)) {
-        throw new Error('Must be a valid domain name (e.g., "mywebsite.com" or "localhost:5173")');
+        throw new Error('Must be a valid URL (e.g., "https://example.com" or "http://127.0.0.1:5500")');
     }
 
-    return true; // Validation passed
+    return true; 
 };
 
 

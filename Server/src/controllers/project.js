@@ -93,17 +93,8 @@ const updateProject = async (req, res) => {
         // 4. Evaluate new data and check for changes
         if (name) project.name = name;
         if (description) project.description = description;
-        
-
-        // Check if domain or email are provided AND are actually different
-        const domainChanged = allowedDomain && allowedDomain !== project.allowedDomain;
-
-        if (domainChanged) {
-            if (allowedDomain) project.allowedDomain = allowedDomain;
-
-            // Regenerate publicId
-            project.publicId = crypto.randomBytes(8).toString('hex');
-        }
+        if (allowedDomain) project.allowedDomain = allowedDomain;
+    
 
         // Update user summary if project status changes
         if (status && status !== project.status) {

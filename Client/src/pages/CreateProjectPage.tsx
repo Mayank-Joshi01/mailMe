@@ -26,13 +26,25 @@ export default function CreateProjectPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const { showAlert } = useAlert()
 
-  const validate = (): boolean => {
+const validate = (): boolean => {
     const e: FormErrors = {}
+    
     if (!name.trim())          e.name = 'Project name is required.'
     else if (name.length < 3)  e.name = 'Name must be at least 3 characters.'
-    if (!domain.trim())        e.domain = 'Allowed domain is required.'
-    else if (!/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain)) e.domain = 'Enter a valid domain (e.g. example.com)'
+    
+    if (!domain.trim()) {
+      e.domain = 'Allowed domain is required.'
+    } else {
+      // ✅ FIX: Removed the '?' after the protocol. It is now REQUIRED.
+      const domainRegex = /^https?:\/\/(([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|localhost|(\d{1,3}\.){3}\d{1,3})(:\d{1,5})?$/
+      
+      if (!domainRegex.test(domain)) {
+        e.domain = 'Must include http:// or https:// (e.g., https://example.com or http://127.0.0.1:5500)'
+      }
+    }
+    
     if (description.length > 200) e.description = 'Max 200 characters.'
+    
     setErrors(e)
     return Object.keys(e).length === 0
   }
