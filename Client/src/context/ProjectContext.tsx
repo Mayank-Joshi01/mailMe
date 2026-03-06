@@ -19,13 +19,13 @@ export interface Project {
 }
 
 export interface Entries {
-    data:  Record<string, string>;
+    data: Record<string, string>;
     createdAt: string;
 }
 
 export interface CurrentEntries {
-    CurrentEntries: Entries[]; 
-    pagination:{
+    CurrentEntries: Entries[];
+    pagination: {
         totalEntries: number,
         totalPages: number,
         currentPage: number,
@@ -38,14 +38,16 @@ interface ProjectContextType {
     projects: Project[];
     loading: boolean;
     error: string | null;
-    currentEntries: CurrentEntries | null; 
+    currentEntries: CurrentEntries | null;
     currentProject: Project | null; // Added currentProject to context
     createProject: (name: string, description: string, allowedDomain: string) => Promise<boolean>;
     deleteProject: (projectId: string) => Promise<boolean>;
     updateProject: (projectId: string, name: string, description: string, allowedDomain: string, status: string) => Promise<boolean>;
     fetchProjects: () => Promise<void>;
-    fetchEntries: (projectId: string, page?: number, limit?: number) => Promise<void>; 
+    fetchEntries: (projectId: string, page?: number, limit?: number) => Promise<void>;
     fetchCurrentProject: (projectId: string) => void; // Added fetchCurrentProject signature
+    newPublicId: string | null;
+    setNewPublicId: (publicId: string | null) => void;
 }
 
 // ── Context Creation ───────────────────────────────────
@@ -58,10 +60,14 @@ export const ProjectContext = createContext<ProjectContextType>({
     createProject: async () => false,
     deleteProject: async () => false,
     updateProject: async () => false,
-    fetchProjects: async () => {},
-    fetchEntries: async () => {}, // Added missing default
-    fetchCurrentProject: () => {} // Added missing default
-    
+    fetchProjects: async () => { },
+    fetchEntries: async () => { }, // Added missing default
+    fetchCurrentProject: () => { }, // Added missing default
+    /// For now only to just display the publicid modal on sucessful project creation.
+    /// Later i will find a better way to handle this instead of keeping it in the context.
+    newPublicId: null,
+    setNewPublicId: () => { }
+
 })
 
 // ── Provider Component ─────────────────────────────────
@@ -71,13 +77,14 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [error, setError] = useState<string | null>(null)
     const [currentEntries, setCurrentEntries] = useState<CurrentEntries | null>(null) // Fixed casing
     const [currentProject, setCurrentProject] = useState<Project | null>(null) // Added currentProject state
+    const [newPublicId, setNewPublicId] = useState<string | null>(null)
 
     const { showAlert } = useAlert()
 
     // ── Fetch Projects ─────────────────────────────────────
     const fetchProjects = async () => {
         setLoading(true)
-        setError(null) 
+        setError(null)
         try {
             const data = await FetchProjects()
             setProjects(data)
@@ -96,9 +103,10 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         setLoading(true)
         setError(null)
         try {
-            await CreateProject(name, description, allowedDomain)
+            const response = await CreateProject(name, description, allowedDomain)
             showAlert('Project created successfully!', 'success')
             // await fetchProjects() // You can keep this for now, or update local state later
+            setNewPublicId(response.publicId) // Set the new public ID to show in the modal
             return true
         } catch (err) {
             const errorMessage = getErrorMessage(err)
@@ -155,7 +163,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         setError(null)
         try {
             const data = await GetEntries(projectId, page, limit)
-            setCurrentEntries({CurrentEntries: data.data, pagination: data.pagination}) // Assuming API returns { data: Entries[], pagination: PaginationInfo }
+            setCurrentEntries({ CurrentEntries: data.data, pagination: data.pagination }) // Assuming API returns { data: Entries[], pagination: PaginationInfo }
         } catch (err) {
             const errorMessage = getErrorMessage(err)
             setError(errorMessage.message || 'Failed to fetch entries.')
@@ -176,18 +184,20 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
     // so it doesn't fire before the user is logged in.
 
     return (
-        <ProjectContext.Provider value={{ 
-            projects, 
-            loading, 
-            error, 
+        <ProjectContext.Provider value={{
+            projects,
+            loading,
+            error,
             currentEntries, // Exposed
             currentProject, // Exposed
-            createProject, 
-            deleteProject, 
-            updateProject, 
+            createProject,
+            deleteProject,
+            updateProject,
             fetchProjects,
             fetchEntries,    // Exposed
-            fetchCurrentProject // Exposed
+            fetchCurrentProject, // Exposed
+            newPublicId,
+            setNewPublicId
         }}>
             {children}
         </ProjectContext.Provider>

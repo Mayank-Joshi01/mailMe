@@ -7,6 +7,7 @@ import StatusInput from '../Components/Project/StatusInput'
 import FormActions from '../Components/Project/FormActions'
 import { useProjects } from '../context/ProjectContext'
 import { useAlert } from '../context/AlertConext'
+import PublicIdModal from '../Components/Project/PublicIdModal'
 
 interface FormErrors {
   name?: string
@@ -21,7 +22,8 @@ export default function CreateProjectPage() {
   const [description, setDescription] = useState('')
   const [errors, setErrors]           = useState<FormErrors>({})
   const [loading, setLoading]         = useState(false)
-  const { createProject } = useProjects()
+  const { createProject,newPublicId } = useProjects()
+  const [modalOpen, setModalOpen] = useState(false)
   const { showAlert } = useAlert()
 
   const validate = (): boolean => {
@@ -44,7 +46,7 @@ export default function CreateProjectPage() {
     if (!response) {setLoading(false)
       showAlert('Failed to create project. Please try again.', 'error')
       return}
-    navigate('/console')
+    setModalOpen(true)
       return
     }
     catch (err) {
@@ -54,7 +56,10 @@ export default function CreateProjectPage() {
     }
   }
 
-  return (
+  return (<>
+    {modalOpen && (
+      <PublicIdModal publicId={newPublicId} onClose={() => {setModalOpen(false) ; navigate('/console')}} />
+    )}
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 shadow-sm">
@@ -79,5 +84,6 @@ export default function CreateProjectPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
