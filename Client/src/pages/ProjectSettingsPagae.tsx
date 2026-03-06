@@ -6,6 +6,7 @@ import DescriptionInput from '../Components/Project/DescriptionInput'
 import StatusInput from '../Components/Project/StatusInput'
 import FormActions from '../Components/Project/FormActions'
 import { useProjects } from '../context/ProjectContext'
+import { useAlert } from '../context/AlertConext'
 
 interface FormErrors {
   name?: string
@@ -14,7 +15,7 @@ interface FormErrors {
 }
 
 export default function ProjectSettingsPage() {
-  const { updateProject , fetchCurrentProject , currentProject } = useProjects() // Get updateProject from context
+  const { updateProject , fetchCurrentProject , currentProject  } = useProjects() // Get updateProject from context
   const { projectId } = useParams() // Get project ID from route params
   const navigate = useNavigate()
   const [name, setName]               = useState(currentProject?.name || '')
@@ -23,6 +24,7 @@ export default function ProjectSettingsPage() {
   const [status, setStatus]           = useState<'active' | 'inactive'>(currentProject?.status || 'active')
   const [errors, setErrors]           = useState<FormErrors>({})
   const [loading, setLoading]         = useState(false)
+  const { showAlert } = useAlert()
 
  
  
@@ -37,20 +39,30 @@ export default function ProjectSettingsPage() {
     if (!name.trim())          e.name = 'Project name is required.'
     else if (name.length < 3)  e.name = 'Name must be at least 3 characters.'
     if (!domain.trim())        e.domain = 'Allowed domain is required.'
-    else if (!/^https?:\/\/.+\..+/.test(domain)) e.domain = 'Enter a valid URL (e.g. https://example.com)'
+    else if (!/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain)) e.domain = 'Enter a valid domain (e.g. example.com)'
     if (description.length > 200) e.description = 'Max 200 characters.'
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
     setLoading(true)
-    setTimeout(() => {
+    try {
+      const response = await updateProject(projectId, name,  description, domain, status ) // Call updateProject from context
+      if (!response) {setLoading(false)
+      showAlert('Failed to create project. Please try again.', 'error')
+      return}
+    navigate('/console')
+      return
+    } catch (err) {
+      console.error('Failed to update project:', err)
+      setErrors({ name: 'Failed to update. Please try again.' })
+    } finally {
       setLoading(false)
-      navigate('/dashboard')
-    }, 800)
+    }
+
   }
 
   return (

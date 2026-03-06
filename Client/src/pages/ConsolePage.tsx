@@ -13,12 +13,9 @@ export default function DashboardPage() {
   const navigate = useNavigate()
 
   // Make sure loading and error are destructured
-  const { projects, loading, error, fetchProjects } = useProjects()
+  const { projects, loading, error } = useProjects()
   const { summary } = useSummary()
 
-  // useEffect(() => {
-  //   fetchProjects();
-  // }, []); 
 
   const handleNewProject = () => {
     navigate('/console/create-project')
