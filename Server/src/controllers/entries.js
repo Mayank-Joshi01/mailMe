@@ -84,6 +84,7 @@ const GetEntries = async (req, res) => {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
+                .select('data createdAt -_id') // Only select necessary fields
                 .lean(),
             Entries.countDocuments({ ProjectId: projectId })
         ]);
@@ -106,41 +107,4 @@ const GetEntries = async (req, res) => {
     }
 };
 
-const DeleteEntries = async (req, res) => {
-    try {
-        const { projectId } = req.params;
-
-        // 1. Security Check: Is the requester the owner?
-        const project = await Projects.findOne({ 
-            _id: projectId, 
-            ownerId: req.user.id 
-        });
-
-        if (!project) {
-            return res.status(403).json({ message: "Unauthorized to delete these entries" });
-        }
-
-        const totalEntriesToDelete = project.totalEntries;
-
-        // 2. Performance: DeleteMany is faster than looping through IDs
-        const result = await Entries.deleteMany({ ProjectId: projectId });
-
-        // 3. Update the UserSummary totalEntries count
-        await UserSummary.findOneAndUpdate(
-            { UserId: project.ownerId },
-            { $inc: { totalEntries: -totalEntriesToDelete } },
-            { new: true }
-        );
-
-        res.status(200).json({
-            success: true,
-            message: `Successfully deleted ${result.deletedCount} entries.`
-        });
-
-    } catch (error) {
-        console.error("DeleteEntries Error:", error);
-        res.status(500).json({ message: "Error performing deletion" });
-    }
-};
-
-module.exports = { EntriesSubmission, GetEntries, DeleteEntries  };
+module.exports = { EntriesSubmission, GetEntries};

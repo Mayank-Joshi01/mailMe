@@ -15,7 +15,7 @@ export default function DomainInput({ value, onChange, error }: DomainInputProps
     >
       <input
         type="text"
-        placeholder="https://example.com"
+        placeholder="example.com"
         value={value}
         onChange={e => onChange(e.target.value)}
         className={`${inputClass} ${error ? 'border-red-400 dark:border-red-500' : ''}`}

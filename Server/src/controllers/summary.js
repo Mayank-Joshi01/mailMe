@@ -6,7 +6,7 @@ const GetSummary =  async (req, res) => {
         if (!userSummary) {
             return res.status(404).json({ message: 'Summary not found for the user' });
         }
-        return res.json({ summary: userSummary });
+        return res.json({totalEntries: userSummary.totalEntries , totalProjects: userSummary.totalProjects , activeProjects: userSummary.activeProjects });
     } catch (error) {
         console.error('Error fetching summary:', error);
         return res.status(500).json({ message: 'Internal server error' });

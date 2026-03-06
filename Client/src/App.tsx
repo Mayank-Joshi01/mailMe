@@ -15,6 +15,7 @@ import NotFoundPage from './pages/404Page'
 import PricingPage from './pages/PricingPage'
 import DocsPage from './pages/DocumentationPage'
 import ConsolePage from './pages/ConsolePage'
+import CreateProjectPage from './pages/CreateProjectPage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
@@ -55,6 +56,11 @@ export default function App() {
           <Route path="/console" element={
             <PrivateRoute>
               <ConsolePage />
+            </PrivateRoute>
+          } />
+          <Route path="/create-project" element={
+            <PrivateRoute>
+              <CreateProjectPage />
             </PrivateRoute>
           } />
         </Route>

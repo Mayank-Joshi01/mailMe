@@ -6,9 +6,10 @@ const API = axios.create({
 
 // Automatically attach the token if it exists in localStorage
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const User : any = JSON.parse(localStorage.getItem('User') || 'null');
+  
+  if (User && config.headers) {
+    config.headers.Authorization = `Bearer ${User.token}`;
   }
   return config;
 });

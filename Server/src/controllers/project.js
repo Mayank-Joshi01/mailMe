@@ -1,6 +1,7 @@
 const Project = require("../models/Project");
 const crypto = require('crypto');
 const UserSummary = require("../models/Summary");
+const Entries = require('../models/Entries');
 
 
 // 1. Get All Projects (Read)
@@ -162,14 +163,19 @@ const deleteProject = async (req, res) => {
             return res.status(401).json({ error: "You do not have permission to delete this project." });
         }
 
+        const totalEntriesToDelete = project.totalEntries;
+
         // 3. Delete the project (Second DB Call)
         const deletedProject = await Project.findByIdAndDelete(projectId);
+
+        const result = await Entries.deleteMany({ ProjectId: projectId });
 
         // 4. Update user summary
         const userSummary = await UserSummary.findOne({ UserId: req.user.id });
         if (userSummary) {
             userSummary.totalProjects -= 1;
             userSummary.activeProjects = deletedProject.status === "active" ? userSummary.activeProjects - 1 : userSummary.activeProjects;
+            userSummary.totalEntries -= totalEntriesToDelete;
             await userSummary.save();
         }
 

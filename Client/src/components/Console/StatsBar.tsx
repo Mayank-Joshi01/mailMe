@@ -1,17 +1,15 @@
-import type { Project } from './consoleData'
+import type { UserSummaryData } from "./consoleData"
 
 interface StatsBarProps {
-  projects: Project[]
+userSummary: UserSummaryData | null ;
 }
 
-export default function StatsBar({ projects }: StatsBarProps) {
-  const totalEntries = projects.reduce((sum, p) => sum + p.entries, 0)
-  const activeCount  = projects.filter(p => p.status === 'active').length
+export default function StatsBar({ userSummary }: StatsBarProps) {
 
   const stats = [
-    { label: 'Total Projects', value: projects.length },
-    { label: 'Active',         value: activeCount      },
-    { label: 'Total Entries',  value: totalEntries     },
+    { label: 'Total Projects', value: userSummary?.totalProjects },
+    { label: 'Active',         value: userSummary?.activeProjects      },
+    { label: 'Total Entries',  value: userSummary?.totalEntries     },
   ]
 
   return (

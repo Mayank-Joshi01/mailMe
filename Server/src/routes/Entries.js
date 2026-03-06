@@ -1,8 +1,9 @@
 const Router = require('express').Router();
 const cors = require('cors');
 const dotenv = require('dotenv');
+const authenticateToken = require('../middlewares/AuthenticateToken');
 dotenv.config();
-const { EntriesSubmission , GetEntries , DeleteEntries } = require('../controllers/entries');
+const { EntriesSubmission , GetEntries } = require('../controllers/entries');
 
 
 // 1. Centralized CORS Configurations
@@ -28,9 +29,6 @@ Router.route('/submit')
  */
 Router.use('/:projectId', privateCors); // Apply private CORS to all routes with projectId
 
-Router.get('/get/:projectId', GetEntries);
-Router.delete('/delete/:projectId', DeleteEntries);
-
-
+Router.post('/get/:projectId', authenticateToken, GetEntries);
 
 module.exports = Router;

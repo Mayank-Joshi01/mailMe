@@ -1,0 +1,178 @@
+import { createContext, useState, useContext } from 'react'
+import type { ReactNode } from 'react'
+import { CreateProject, DeleteProject, UpdateProject, FetchProjects } from "../api/projects"
+import { GetEntries } from "../api/Entries"
+import { useAlert } from './AlertConext'
+import { getErrorMessage } from '../Utils/errorHandler'
+
+// ── Types ──────────────────────────────────────────────
+export interface Project {
+    id: string;
+    name: string;
+    description: string;
+    allowedDomain: string;
+    status: string;
+    totalEntries: number;
+    createdAt: string;
+    publicId: string;
+}
+
+export interface Entries {
+    createdAt: string;
+    data: any[]; // Fixed: changed from [] to any[]
+}
+
+export interface CurrentEntries {
+    CurrentEntries: Entries[]; 
+}
+
+// Fixed: Added missing fetchEntries signature
+interface ProjectContextType {
+    projects: Project[];
+    loading: boolean;
+    error: string | null;
+    currentEntries: CurrentEntries | null; 
+    createProject: (name: string, description: string, allowedDomain: string) => Promise<boolean>;
+    deleteProject: (projectId: string) => Promise<boolean>;
+    updateProject: (projectId: string, name: string, description: string, allowedDomain: string, status: string) => Promise<boolean>;
+    fetchProjects: () => Promise<void>;
+    fetchEntries: (projectId: string, page?: number, limit?: number) => Promise<void>; 
+}
+
+// ── Context Creation ───────────────────────────────────
+export const ProjectContext = createContext<ProjectContextType>({
+    projects: [],
+    loading: false,
+    error: null,
+    currentEntries: null,
+    createProject: async () => false,
+    deleteProject: async () => false,
+    updateProject: async () => false,
+    fetchProjects: async () => {},
+    fetchEntries: async () => {}, // Added missing default
+})
+
+// ── Provider Component ─────────────────────────────────
+export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const [projects, setProjects] = useState<Project[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<string | null>(null)
+    const [currentEntries, setCurrentEntries] = useState<CurrentEntries | null>(null) // Fixed casing
+    
+    const { showAlert } = useAlert()
+
+    // ── Fetch Projects ─────────────────────────────────────
+    const fetchProjects = async () => {
+        setLoading(true)
+        setError(null) 
+        try {
+            const data = await FetchProjects()
+            setProjects(data)
+        } catch (err) {
+            const errorMessage = getErrorMessage(err)
+            setError(errorMessage.message || 'Failed to fetch projects.')
+            showAlert(errorMessage.message || 'Failed to fetch projects.', 'error')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // ── Create Project ─────────────────────────────────────
+    const createProject = async (name: string, description: string, allowedDomain: string): Promise<boolean> => {
+        setLoading(true)
+        setError(null)
+        try {
+            await CreateProject(name, description, allowedDomain)
+            showAlert('Project created successfully!', 'success')
+            await fetchProjects() // You can keep this for now, or update local state later
+            return true
+        } catch (err) {
+            const errorMessage = getErrorMessage(err)
+            setError(errorMessage.message || 'Failed to create project.')
+            showAlert(errorMessage.message || 'Failed to create project.', 'error')
+            return false
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // ── Delete Project ─────────────────────────────────────
+    const deleteProject = async (projectId: string): Promise<boolean> => {
+        setLoading(true)
+        setError(null)
+        try {
+            await DeleteProject(projectId)
+            showAlert('Project deleted successfully!', 'success')
+            
+            // Optimization: Remove from local state instantly instead of refetching all projects
+            setProjects(prevProjects => prevProjects.filter(p => p.id !== projectId))
+            return true
+        } catch (err) {
+            const errorMessage = getErrorMessage(err)
+            setError(errorMessage.message || 'Failed to delete project.')
+            showAlert(errorMessage.message || 'Failed to delete project.', 'error')
+            return false
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // ── Update Project ─────────────────────────────────────
+    const updateProject = async (projectId: string, name: string, description: string, allowedDomain: string, status: string): Promise<boolean> => {
+        setLoading(true)
+        setError(null)
+        try {
+            await UpdateProject(projectId, name, description, allowedDomain, status)
+            showAlert('Project updated successfully!', 'success')
+            await fetchProjects()
+            return true
+        } catch (err) {
+            const errorMessage = getErrorMessage(err)
+            setError(errorMessage.message || 'Failed to update project.')
+            showAlert(errorMessage.message || 'Failed to update project.', 'error')
+            return false
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // ── Fetch Entries ──────────────────────────────────────
+    const fetchEntries = async (projectId: string, page: number = 1, limit: number = 10) => {
+        setLoading(true)
+        setError(null)
+        try {
+            const data = await GetEntries(projectId, page, limit)
+            setCurrentEntries(data)
+        } catch (err) {
+            const errorMessage = getErrorMessage(err)
+            setError(errorMessage.message || 'Failed to fetch entries.')
+            showAlert(errorMessage.message || 'Failed to fetch entries.', 'error')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // REMOVED: useEffect(() => { fetchProjects() }, [])
+    // Why? It's better to call fetchProjects() manually in the component that needs it 
+    // so it doesn't fire before the user is logged in.
+
+    return (
+        <ProjectContext.Provider value={{ 
+            projects, 
+            loading, 
+            error, 
+            currentEntries, // Exposed
+            createProject, 
+            deleteProject, 
+            updateProject, 
+            fetchProjects,
+            fetchEntries    // Exposed
+        }}>
+            {children}
+        </ProjectContext.Provider>
+    )
+}
+
+// ── Hook ───────────────────────────────────────────────
+// Makes importing much easier in your components!
+export const useProjects = () => useContext(ProjectContext)

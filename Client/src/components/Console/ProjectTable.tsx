@@ -24,8 +24,8 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden">
 
       {/* Table header */}
-      <div className="grid grid-cols-4 px-6 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-        {['Project Name', 'Entries', 'Created', 'Status'].map(col => (
+      <div className="grid grid-cols-3 px-6 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+        {['Project Name', 'Entries', 'Status'].map(col => (
           <p key={col} className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
             {col}
           </p>
@@ -37,7 +37,7 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
         {projects.map(project => (
           <div
             key={project.id}
-            className="grid grid-cols-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer items-center"
+            className="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors cursor-pointer items-center"
           >
             {/* Name */}
             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -46,12 +46,7 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
 
             {/* Entries */}
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {project.entries.toLocaleString()}
-            </p>
-
-            {/* Date */}
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {project.createdAt}
+              {project.totalEntries.toLocaleString()}
             </p>
 
             {/* Status */}

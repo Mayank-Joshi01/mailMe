@@ -5,6 +5,8 @@ import DomainInput from '../Components/Project/DomainInput'
 import DescriptionInput from '../Components/Project/DescriptionInput'
 import StatusInput from '../Components/Project/StatusInput'
 import FormActions from '../Components/Project/FormActions'
+import { useProjects } from '../context/ProjectContext'
+import { useAlert } from '../context/AlertConext'
 
 interface FormErrors {
   name?: string
@@ -19,26 +21,37 @@ export default function CreateProjectPage() {
   const [description, setDescription] = useState('')
   const [errors, setErrors]           = useState<FormErrors>({})
   const [loading, setLoading]         = useState(false)
+  const { createProject } = useProjects()
+  const { showAlert } = useAlert()
 
   const validate = (): boolean => {
     const e: FormErrors = {}
     if (!name.trim())          e.name = 'Project name is required.'
     else if (name.length < 3)  e.name = 'Name must be at least 3 characters.'
     if (!domain.trim())        e.domain = 'Allowed domain is required.'
-    else if (!/^https?:\/\/.+\..+/.test(domain)) e.domain = 'Enter a valid URL (e.g. https://example.com)'
+    else if (!/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(domain)) e.domain = 'Enter a valid domain (e.g. example.com)'
     if (description.length > 200) e.description = 'Max 200 characters.'
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validate()) return
     setLoading(true)
-    setTimeout(() => {
+    try {
+    const response = await createProject(name, description, domain)
+    if (!response) {setLoading(false)
+      showAlert('Failed to create project. Please try again.', 'error')
+      return}
+    navigate('/console')
+      return
+    }
+    catch (err) {
+      showAlert('Failed to create project. Please try again.', 'error')
       setLoading(false)
-      navigate('/dashboard')
-    }, 800)
+      return
+    }
   }
 
   return (
