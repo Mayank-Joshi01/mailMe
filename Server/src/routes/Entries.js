@@ -20,7 +20,7 @@ const privateCors = cors({
 
 
 //  No auth required, but protected by the 'publicid' check in your controller  //  
-Router.route('/submit')
+Router.route('/submit/:publicId')
     .options(publicCors)
     .post(publicCors, EntriesSubmission);
 

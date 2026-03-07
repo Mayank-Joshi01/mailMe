@@ -19,8 +19,8 @@ API.interceptors.request.use((config) => {
 API.interceptors.response.use(
   (response) => response, // If request succeeds, just return the data
   (error) => {
-    // If the backend says the token is expired/invalid (401)
-    if (error.response && error.response.status === 401) {
+    // If the backend says the token is expired/invalid (401) or the user is forbidden (403), we log them out
+    if (error.response && error.response.status === 401 || error.response.status === 403) {
       console.warn("Session expired. Logging out...");
       
       // Destroy the local storage

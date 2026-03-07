@@ -6,19 +6,26 @@ let UserSummary = require("../models/Summary");
 
 const EntriesSubmission = async (req, res) => {
     try {
-        const publicId = req.headers['publicid'];
+        const paramPublicId = req.params;
+        const publicId = paramPublicId.publicId;
 
-        const data = req.body;
+        const formData = req.body;
+
+        const {_gotcha , ...data} = formData;
         
         /// It will only filter bots if the user have use a field as hidden with name ' _gotcha ' in it's form 
-        if (data._gotcha) {
+        if (_gotcha) {
             // If honeypot field is filled, assume it's a bot
             // Return 200 OK to avoid alerting the bot
             return res.status(200).send("Submission received");
         }
 
+        console.log("publicId : ",publicId);
+
         // 2. Project Verification
-        const project = await Projects.findOne({ publicId }) // .lean() for faster read-only
+        const project = await Projects.findOne({ publicId: publicId }) // .lean() for faster read-only
+
+        console.log("Project " , project);
 
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });
