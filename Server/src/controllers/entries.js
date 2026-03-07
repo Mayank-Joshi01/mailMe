@@ -8,6 +8,15 @@ const EntriesSubmission = async (req, res) => {
     try {
         const publicId = req.headers['publicid'];
 
+        const data = req.body;
+        
+        /// It will only filter bots if the user have use a field as hidden with name ' _gotcha ' in it's form 
+        if (data._gotcha) {
+            // If honeypot field is filled, assume it's a bot
+            // Return 200 OK to avoid alerting the bot
+            return res.status(200).send("Submission received");
+        }
+
         // 2. Project Verification
         const project = await Projects.findOne({ publicId }) // .lean() for faster read-only
 
@@ -32,12 +41,13 @@ const EntriesSubmission = async (req, res) => {
             return res.status(403).json({ message: 'Project is inactive' });
         }
 
+
         // 4. Data Persistence & Email
         // Use Promise.all if you want them to happen concurrently for speed
         const newEntry = new Entries({
             ProjectId: project._id,
             UserId: project.ownerId,
-            data: req.body
+            data: data
         });
 
         await Promise.all([
@@ -51,7 +61,7 @@ const EntriesSubmission = async (req, res) => {
             sendEmail(
                 project.targetEmail,
                 "New Entry Submitted",
-                getSubmissionEmailTemplate(project.name, req.body)
+                getSubmissionEmailTemplate(project.name, data)
             )
         ]);
 
