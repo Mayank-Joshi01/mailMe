@@ -171,9 +171,23 @@ try {
 }
  }
 
-
+const GetUserInfo = async (req, res) => {
+    // This is a protected route, so we assume the user is authenticated and their info is in req.user
+    const userId = req.user.id;
+    try {
+        const user = await User.findById(userId).select('-password'); // Exclude password
+        if (!user) {
+            return res.status(404).send({ message: "User not found", success: false });
+        }
+        res.status(200).send({ user, success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Internal Server Error", success: false });
+    }
+}
 module.exports = {
     Register,
     Login,
-    VerifyMagicLink
+    VerifyMagicLink,
+    GetUserInfo
 }

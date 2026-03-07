@@ -25,6 +25,12 @@ export interface MagicLinkResponse {
         email: string;
     }
 }
+
+export interface UserProfileResponse {
+    name: string;
+    email: string;
+}
+
 export const login = async (email: string, password: string): Promise<UserLoginResponse> => {
     try {
         const response = await API.post('/auth/login', { email, password });
@@ -46,6 +52,15 @@ export const register = async (name: string, email: string, password: string): P
 export const verifyMagicLink = async (token: string, email: string): Promise<UserLoginResponse> => {
     try {
         const response = await API.post("auth/verify-signup",{token,email});
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const GetUserProfile = async (): Promise<{ user : UserProfileResponse , sucess : boolean }> => {
+    try {
+        const response = await API.get('/auth/profile', {});
         return response.data;
     } catch (error) {
         throw error;
