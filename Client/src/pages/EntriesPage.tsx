@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { useNavigate,useParams } from 'react-router'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router'
 
 import EntriesHeader from "../Components/Entries/EntriesHeader"
 import EntriesGrid   from '../Components/Entries/EntriesGrid'
@@ -7,35 +7,42 @@ import Pagination    from '../Components/Entries/Pagination'
 import EmptyState    from '../Components/Entries/EmptyState'
 import { useProjects } from '../context/ProjectContext'
 
-// ── Swap these out for your real router params + API data ─────────────────────
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function EntriesPage() {
   const navigate = useNavigate()
-  const { projectId } = useParams() // Get project ID from route params
-  const { fetchEntries , currentProject ,currentEntries, fetchCurrentProject } = useProjects() // Get fetchEntries from context
-  const [currentPage, setCurrentPage] = useState(currentEntries?.pagination.currentPage ?? 1)
-  const [perPage, setPerPage]         = useState(currentEntries?.pagination.limit ?? 10)
+  const { projectId } = useParams() 
+  const { fetchEntries, currentProject, currentEntries, fetchCurrentProject } = useProjects() 
+  
+  // Hardcode defaults initially to prevent stale state bugs from previous projects
+  const [currentPage, setCurrentPage] = useState(1)
+  const [perPage, setPerPage]         = useState(10)
 
-//   const paginatedEntries = useMemo(() => {
-//     const start = (currentPage - 1) * perPage
-//     return allEntries.slice(start, start + perPage)
-//   }, [currentPage, perPage])
-
+  // 1. Fetch Project Details ONLY when the URL (projectId) changes
   useEffect(() => {
     if (projectId) {
-      fetchCurrentProject(projectId) // Fetch current project details using the ID from params
-      fetchEntries(projectId, currentPage, perPage) // Fetch entries for this project
-      fetchEntries(projectId, currentPage, perPage) // Fetch entries for this project
+      fetchCurrentProject(projectId)
     }
-  }, [projectId, fetchCurrentProject, fetchEntries, currentPage, perPage])
+    // We intentionally exclude fetchCurrentProject to break the infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId])
 
-  // Reset to page 1 whenever per-page changes
+  // 2. Fetch Entries when the URL OR the pagination changes
+  useEffect(() => {
+    if (projectId) {
+      // Notice: Only calling this ONCE now!
+      fetchEntries(projectId, currentPage, perPage) 
+    }
+    // Exclude fetchEntries for the same reason
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, currentPage, perPage])
+
   const handlePerPageChange = (n: number) => {
     setPerPage(n)
-    setCurrentPage(1)
+    setCurrentPage(1) // Reset to page 1 whenever per-page changes
   }
+
+  // Safe fallbacks for the UI
+  const entries = currentEntries?.CurrentEntries || []
+  const pagination = currentEntries?.pagination || { currentPage: 1, totalPages: 1 }
 
   return (
     <main className="min-h-screen bg-zinc-950 font-sans">
@@ -43,8 +50,8 @@ export default function EntriesPage() {
 
         {/* Header */}
         <EntriesHeader
-          projectName={currentProject?.name?? 'Project'}
-          entryCount={currentEntries?.CurrentEntries.length ?? 0}
+          projectName={currentProject?.name ?? 'Project'}
+          entryCount={entries.length}
           perPage={perPage}
           onPerPageChange={handlePerPageChange}
           onBack={() => navigate(-1)}
@@ -55,14 +62,14 @@ export default function EntriesPage() {
         <div className="border-t border-zinc-800 my-6" />
 
         {/* Content */}
-        {currentEntries?.CurrentEntries.length === 0 ? (
+        {entries.length === 0 ? (
           <EmptyState />
         ) : (
           <>
-            <EntriesGrid entries={currentEntries?.CurrentEntries ?? []} />
+            <EntriesGrid entries={entries} />
             <Pagination
-              currentPage={currentEntries?.pagination.currentPage ?? 1}
-              totalPages={currentEntries?.pagination.totalPages ?? 1}
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
               onPageChange={setCurrentPage}
             />
           </>

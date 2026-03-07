@@ -15,7 +15,7 @@ export default function FormActions({ loading, submitLabel, loadingLabel }: Form
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/console')}
           className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
             text-sm font-medium text-gray-600 dark:text-gray-400
             hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"

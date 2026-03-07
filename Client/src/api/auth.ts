@@ -60,7 +60,7 @@ export const verifyMagicLink = async (token: string, email: string): Promise<Use
 
 export const GetUserProfile = async (): Promise<{ user : UserProfileResponse , sucess : boolean }> => {
     try {
-        const response = await API.get('/auth/profile', {});
+        const response = await API.get('/auth/me', {});
         return response.data;
     } catch (error) {
         throw error;
