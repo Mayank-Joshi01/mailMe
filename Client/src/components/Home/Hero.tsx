@@ -25,7 +25,7 @@ export default function Hero() {
       {/* Buttons */}
       <div className="flex gap-3 mt-8 flex-wrap justify-center">
         <button
-          onClick={() => navigate('/register')}
+          onClick={() => navigate('/console')}
           className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
         >
           Get started free

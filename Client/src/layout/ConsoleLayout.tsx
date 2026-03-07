@@ -48,7 +48,7 @@ export default function ConsoleLayout() {
 
     // 4. Render the actual page (Console, Settings, etc.) inside the layout
     return (
-        <div >
+        <div className="min-h-screen w-full">
             {/* You can even put a global Sidebar or Navbar here! */}
             <main>
                 <Outlet /> 
