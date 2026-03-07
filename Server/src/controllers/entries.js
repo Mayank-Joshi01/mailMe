@@ -40,20 +40,6 @@ const EntriesSubmission = async (req, res) => {
             data: req.body
         });
 
-        // await Promise.all([
-        //     newEntry.save(),
-        //     UserSummary = UserSummary.findOneAndUpdate(
-        //         { UserId: project.ownerId },
-        //         { $inc: { totalEntries: 1 } },
-        //         { new: true, upsert: true }
-        //     ).exec(), // Add .exec() to make it a proper promise
-        //     project.updateOne({ $inc: { totalEntries: 1 } }), // Increment totalEntries in the project
-        //     sendEmail(
-        //         project.targetEmail,
-        //         "New Entry Submitted",
-        //         getSubmissionEmailTemplate(project.name, req.body)
-        //     )
-        // ]);
         await Promise.all([
             newEntry.save(),
             UserSummary.findOneAndUpdate(
