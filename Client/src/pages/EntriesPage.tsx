@@ -51,7 +51,7 @@ export default function EntriesPage() {
         {/* Header */}
         <EntriesHeader
           projectName={currentProject?.name ?? 'Project'}
-          entryCount={entries.length}
+          entryCount={currentProject?.totalEntries ?? 0}
           perPage={perPage}
           onPerPageChange={handlePerPageChange}
           onBack={() => navigate(-1)}

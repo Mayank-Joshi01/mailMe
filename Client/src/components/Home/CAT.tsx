@@ -12,7 +12,7 @@ export default function CTA() {
         Start collecting responses today
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 max-w-sm">
-        Free forever for small projects. No credit card required.
+        Free for small projects. 
       </p>
 
       { !user && <button
@@ -23,7 +23,7 @@ export default function CTA() {
       </button>}
 
       <p className="text-xs text-gray-400 dark:text-gray-600 mt-4">
-        Trusted by 2,000+ developers and makers
+        Trusted by thousands of developers and makers
       </p>
 
     </section>

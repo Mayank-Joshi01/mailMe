@@ -1,8 +1,8 @@
 const steps = [
   {
     number: '01',
-    title: 'Create an account',
-    description: 'Sign up for free and get your unique public ID instantly.',
+    title: 'Create an Project',
+    description: 'Sign up and create a project to get your unique public ID instantly.',
   },
   {
     number: '02',

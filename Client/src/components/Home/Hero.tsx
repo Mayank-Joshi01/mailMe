@@ -45,10 +45,13 @@ export default function Hero() {
           <span className="w-3 h-3 rounded-full bg-yellow-500" />
           <span className="w-3 h-3 rounded-full bg-green-500" />
         </div>
-        <pre className="text-sm font-mono text-green-400 whitespace-pre">{`<script 
-  src="https://postdrop.io/sdk.js"
-  data-id="YOUR_PUBLIC_ID">
-</script>`}
+        <pre className="text-sm font-mono text-green-400 whitespace-pre">{`<form public-id="your-public-id">
+
+  .... // Your form fields here
+  
+</form>
+
+<script src="https://postdrop.io/sdk.js" </script>`}
         </pre>
       </div>
 

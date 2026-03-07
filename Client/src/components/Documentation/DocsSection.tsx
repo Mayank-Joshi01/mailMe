@@ -18,7 +18,14 @@ export default function DocsSection({ title, body, code }: DocsSectionProps) {
 
       {/* Body */}
       <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-        {body}
+        {body.split('\n').map((paragraph: string, index: number) => (
+          // Only render the paragraph if it's not an empty string
+          paragraph.trim() !== '' && (
+            <p key={index} className="mb-4 leading-relaxed">
+              {paragraph}
+            </p>
+          )
+        ))}
       </p>
 
       {/* Code block */}
