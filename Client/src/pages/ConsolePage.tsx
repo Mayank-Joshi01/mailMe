@@ -24,13 +24,18 @@ export default function DashboardPage() {
     navigate(`/console/project/${projectId}`)
   }
 
-  // ✅ 1. Guard clause for Loading
+  // ✅ 1. Guard clause for Loading so that use dont feel laged when fetching data
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <p className="text-xl font-semibold">Loading your workspace...</p>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Your Projects</h1>
+      {/* Fake placeholder cards that pulse */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="h-32 bg-gray-200 dark:bg-zinc-800 rounded-lg animate-pulse"></div>
+        <div className="h-32 bg-gray-200 dark:bg-zinc-800 rounded-lg animate-pulse"></div>
       </div>
-    )
+    </div>
+  );
   }
 
   // ✅ 2. Guard clause for Errors
