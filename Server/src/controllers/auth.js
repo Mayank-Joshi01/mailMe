@@ -6,7 +6,11 @@ const bcrypt = require('bcryptjs');
 const { sendEmail } = require("../Services/Mail");
 const jwt = require("jsonwebtoken");
 const userSummary = require("../models/Summary");
+const { OAuth2Client } = require('google-auth-library');
 require("dotenv").config();
+
+// Initialize the Google Client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Helper function to generate and store magic link token
 async function generateMagicLink(userEmail) {
@@ -185,9 +189,60 @@ const GetUserInfo = async (req, res) => {
         res.status(500).send({ message: "Internal Server Error", success: false });
     }
 }
+
+const googleLogin = async (req, res) => {
+    try {
+        console.log("Received Google token:", req.body.token); // Debug log to check the received token
+        // 1. Catch the token sent from the React frontend
+        const { token } = req.body;
+
+        // 2. Ask Google to verify if this token is real and belongs to PostDrop
+        const ticket = await googleClient.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        // 3. Extract the user's secure information from the verified token
+        const payload = ticket.getPayload();
+        const { email, name } = payload; 
+
+        // 4. Check MongoDB: Have they logged into PostDrop before?
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // 5. If they are brand new, create a new PostDrop account for them!
+            // (Note: We don't need a password because Google handles their security)
+            user = await User.create({
+                name: name,
+                email: email,
+                // If your User schema requires a password, you can generate a random string here, 
+                // or update your schema to make password optional for Google users.
+            });
+        }
+
+        // 6. Generate YOUR custom PostDrop JSON Web Token (just like a normal login)
+        const postDropToken = jwt.sign(
+            { id: user._id , email: user.email}, 
+            process.env.JWT_SECRET, // Make sure you have a JWT_SECRET in your .env
+            { expiresIn: '1h' }
+        );
+
+        // 7. Send the token and user data back to the React frontend
+        return res.status(200).json({
+            token: postDropToken,
+            user: {name: user.name, email: user.email }
+        });
+
+    } catch (error) {
+        console.error("Google Auth Error:", error);
+        return res.status(401).json({ message: "Invalid Google Token" });
+    }
+};
+
 module.exports = {
     Register,
     Login,
     VerifyMagicLink,
-    GetUserInfo
+    GetUserInfo,
+    googleLogin
 }

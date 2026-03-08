@@ -17,7 +17,7 @@ const rateLimiter = rateLimit({
 
 const FrontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
 
-const { Register, Login, VerifyMagicLink,GetUserInfo } = require("../controllers/auth");
+const { Register, Login, VerifyMagicLink,GetUserInfo,googleLogin } = require("../controllers/auth");
 const { validateUserRegistration, validateUserLogin, validateUrl,handleValidationErrors} = require('../middlewares/userValidator');
 const authenticateToken = require('../middlewares/AuthenticateToken');
 
@@ -34,5 +34,8 @@ Router.post("/verify-signup", rateLimiter, validateUrl, handleValidationErrors, 
 
 // 4. Get User Info Route - Protected route to get user info (for testing purposes)
 Router.get("/me", authenticateToken, GetUserInfo);
+
+// 5. Google Login Route - Handles Google OAuth login
+Router.post("/google-login", googleLogin);
 
 module.exports = Router;
