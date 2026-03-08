@@ -199,7 +199,7 @@ const GetUserInfo = async (req, res) => {
 
 const googleAuth = async (req, res) => {
     try {
-        console.log("Received Google token:", req.body.token); // Debug log to check the received token
+        
         // 1. Catch the token sent from the React frontend
         const { token } = req.body;
 

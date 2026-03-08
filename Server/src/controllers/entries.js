@@ -20,12 +20,9 @@ const EntriesSubmission = async (req, res) => {
             return res.status(200).send("Submission received");
         }
 
-        console.log("publicId : ",publicId);
-
         // 2. Project Verification
         const project = await Projects.findOne({ publicId: publicId }) // .lean() for faster read-only
 
-        console.log("Project " , project);
 
         if (!project) {
             return res.status(404).json({ message: 'Project not found' });

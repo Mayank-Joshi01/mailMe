@@ -118,7 +118,6 @@ const updateProject = async (req, res) => {
                     updateFields,
                     { upsert: true, new: true }
                 );
-                console.log(`Summary updated: ${status} transition complete.`);
             }
         }
 
