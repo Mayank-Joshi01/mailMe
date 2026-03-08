@@ -30,7 +30,6 @@ export default function ConsoleLayout() {
         if(user) {
             fetchProjects();
             fetchUserSummary();
-            console.log('Fetching projects and summary for user:', user.name);
         }
 
     }, [user , location.pathname]); // Re-run if user changes

@@ -88,7 +88,6 @@ export const ProjectProvider: React.FC<{ children: ReactNode }> = ({ children })
         try {
             const data = await FetchProjects()
             setProjects(data)
-            console.log('Fetched projects:', data) // Debug log
         } catch (err) {
             const errorMessage = getErrorMessage(err)
             setError(errorMessage.message || 'Failed to fetch projects.')

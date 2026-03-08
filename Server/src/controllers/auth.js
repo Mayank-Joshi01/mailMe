@@ -43,7 +43,7 @@ const Register = async (req, res) => {
         const { name, email, password } = req.body;
 
         const existingUser = await User.findOne({ email });
-        
+
         if (existingUser) {
             return res.status(400).send({ message: "Email already registered.", success: false });
         }
@@ -124,63 +124,63 @@ const VerifyMagicLink = async (req, res) => {
     });
 
     // Create Session or JWT here if you want to log them in immediately
-    const jwtToken = jwt.sign({ email: user.email , id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const jwtToken = jwt.sign({ email: user.email, id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
 
     // Delete pending user record
     await PendingUser.deleteOne({ email });
 
-    res.status(200).send({ message: "Email verified! .", success: true, token: jwtToken , user: { name: user.name, email: user.email } });
+    res.status(200).send({ message: "Email verified! .", success: true, token: jwtToken, user: { name: user.name, email: user.email } });
 }
 
 const Login = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-try {
-    // 1. Find user (Only select the password field if you've set it to 'select: false' in schema)
-    const user = await User.findOne({ email });
+    try {
+        // 1. Find user (Only select the password field if you've set it to 'select: false' in schema)
+        const user = await User.findOne({ email });
 
-    // Security Tip: Use the same generic message for both "not found" and "wrong password"
-    // to prevent "Email Enumeration" attacks.
-    if (!user) {
-        return res.status(400).send({ message: "Invalid email or password.", success: false });
-    }
+        // Security Tip: Use the same generic message for both "not found" and "wrong password"
+        // to prevent "Email Enumeration" attacks.
+        if (!user) {
+            return res.status(400).send({ message: "Invalid email or password.", success: false });
+        }
 
-    // 🚨 THE BOUNCER: Check if they are a Google user!
+        // 🚨 THE BOUNCER: Check if they are a Google user!
         if (user.authProvider === 'google') {
-            return res.status(400).json({ 
-                message: "You signed up with Google. Please click 'Continue with Google' to log in." 
+            return res.status(400).json({
+                message: "You signed up with Google. Please click 'Continue with Google' to log in."
             });
         }
 
-    // 2. CORRECT Comparison
-    // Pass the PLAIN password from req.body, NOT a new hashedPassword.
-    const isMatch = await bcrypt.compare(password, user.password);
+        // 2. CORRECT Comparison
+        // Pass the PLAIN password from req.body, NOT a new hashedPassword.
+        const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
-        return res.status(400).send({ message: "Invalid email or password.", success: false });
+        if (!isMatch) {
+            return res.status(400).send({ message: "Invalid email or password.", success: false });
+        }
+
+        // 3. Generate JWT
+        // Use only the ID. Avoid putting the email in the payload if you don't need it (smaller token).
+        const jwtToken = jwt.sign(
+            { email: user.email, id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.status(200).send({
+            message: "Login successful!",
+            success: true,
+            token: jwtToken,
+            user: { name: user.name, email: user.email } // Return user info for frontend
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Internal Server Error", success: false });
     }
-
-    // 3. Generate JWT
-    // Use only the ID. Avoid putting the email in the payload if you don't need it (smaller token).
-    const jwtToken = jwt.sign(
-        { email: user.email, id: user._id }, 
-        process.env.JWT_SECRET, 
-        { expiresIn: '1h' }
-    );
-
-    res.status(200).send({ 
-        message: "Login successful!", 
-        success: true, 
-        token: jwtToken,
-        user: { name: user.name, email: user.email } // Return user info for frontend
-    });
-
-} catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Internal Server Error", success: false });
 }
- }
 
 const GetUserInfo = async (req, res) => {
     // This is a protected route, so we assume the user is authenticated and their info is in req.user
@@ -211,7 +211,7 @@ const googleAuth = async (req, res) => {
 
         // 3. Extract the user's secure information from the verified token
         const payload = ticket.getPayload();
-        const { email, name } = payload; 
+        const { email, name } = payload;
 
         // 4. Check MongoDB: Have they logged into PostDrop before?
         let user = await User.findOne({ email });
@@ -224,11 +224,16 @@ const googleAuth = async (req, res) => {
                 email: email,
                 authProvider: 'google' // Mark this user as a Google-authenticated user
             });
+
+            // Create a default summary for the new user
+            await userSummary.create({
+                UserId: user._id,
+            });
         }
 
         // 6. Generate YOUR custom PostDrop JSON Web Token (just like a normal login)
         const postDropToken = jwt.sign(
-            { id: user._id , email: user.email}, 
+            { id: user._id, email: user.email },
             process.env.JWT_SECRET, // Make sure you have a JWT_SECRET in your .env
             { expiresIn: '1h' }
         );
@@ -236,7 +241,7 @@ const googleAuth = async (req, res) => {
         // 7. Send the token and user data back to the React frontend
         return res.status(200).json({
             token: postDropToken,
-            user: {name: user.name, email: user.email }
+            user: { name: user.name, email: user.email }
         });
 
     } catch (error) {

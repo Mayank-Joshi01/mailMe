@@ -17,7 +17,7 @@ export default function DocsSection({ title, body, code }: DocsSectionProps) {
       <div className="h-px bg-gray-200 dark:bg-gray-700" />
 
       {/* Body */}
-      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+      <div className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
         {body.split('\n').map((paragraph: string, index: number) => (
           // Only render the paragraph if it's not an empty string
           paragraph.trim() !== '' && (
@@ -26,7 +26,7 @@ export default function DocsSection({ title, body, code }: DocsSectionProps) {
             </p>
           )
         ))}
-      </p>
+      </div>
 
       {/* Code block */}
       {code && (
