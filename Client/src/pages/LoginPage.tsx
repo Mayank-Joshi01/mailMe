@@ -4,9 +4,10 @@ import { useAlert } from '../context/AlertConext'
 import InputField from '../Components/InputField'
 import Button from '../Components/Button'
 import { useNavigate } from 'react-router'
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login,googleAuth } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -48,7 +49,19 @@ export default function LoginPage() {
   }
 
   // Replace with real Google OAuth when ready
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (GoogleCredentials : string) => {
+    setLoading(true)
+    try {
+      const success = await googleAuth(GoogleCredentials)
+      if (success) {
+        navigate('/')
+      }
+    } catch (err: any) {
+      showAlert(err.response?.data?.message || 'Google login failed. Please try again.', 'error')
+    } finally {
+      setLoading(false)
+    }
+
   }
 
   return (
@@ -90,16 +103,14 @@ export default function LoginPage() {
           </div>
 
           {/* ── Google Button ── */}
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border
-              border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
-              text-sm font-medium text-gray-700 dark:text-gray-200
-              hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-            Continue with Google
-          </button>
+      <GoogleLogin
+        onSuccess={(credentialResponse : any) => {
+          handleGoogleLogin(credentialResponse.credential)
+        }}
+        onError={() => {
+          console.log('Login Failed');
+        }}
+      />
 
           <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-5">
             Don't have an account?{' '}

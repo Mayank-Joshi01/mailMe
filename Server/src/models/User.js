@@ -12,7 +12,12 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+    },
+    // 2. Add an Auth Provider flag so you know how they registered
+    authProvider: { 
+        type: String, 
+        enum: ['local', 'google'], // 'local' means email/password
+        default: 'local' 
     },
     createdAt: {
         type: Date,

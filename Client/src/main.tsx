@@ -7,6 +7,9 @@ import { BrowserRouter } from 'react-router'
 import { AlertProvider } from './context/AlertConext'
 import { ProjectProvider } from './context/ProjectContext'
 import { SummaryProvider } from './context/SummaryContext'
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const GOOGLE_CLIENT_ID =  import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -15,7 +18,9 @@ createRoot(document.getElementById('root')!).render(
     <ProjectProvider>
     <SummaryProvider>
     <AuthProvider>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <App />
+      </GoogleOAuthProvider>
     </AuthProvider>
     </SummaryProvider>
     </ProjectProvider>

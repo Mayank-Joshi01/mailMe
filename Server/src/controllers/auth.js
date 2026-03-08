@@ -146,6 +146,13 @@ try {
         return res.status(400).send({ message: "Invalid email or password.", success: false });
     }
 
+    // 🚨 THE BOUNCER: Check if they are a Google user!
+        if (user.authProvider === 'google') {
+            return res.status(400).json({ 
+                message: "You signed up with Google. Please click 'Continue with Google' to log in." 
+            });
+        }
+
     // 2. CORRECT Comparison
     // Pass the PLAIN password from req.body, NOT a new hashedPassword.
     const isMatch = await bcrypt.compare(password, user.password);
@@ -190,7 +197,7 @@ const GetUserInfo = async (req, res) => {
     }
 }
 
-const googleLogin = async (req, res) => {
+const googleAuth = async (req, res) => {
     try {
         console.log("Received Google token:", req.body.token); // Debug log to check the received token
         // 1. Catch the token sent from the React frontend
@@ -215,8 +222,7 @@ const googleLogin = async (req, res) => {
             user = await User.create({
                 name: name,
                 email: email,
-                // If your User schema requires a password, you can generate a random string here, 
-                // or update your schema to make password optional for Google users.
+                authProvider: 'google' // Mark this user as a Google-authenticated user
             });
         }
 
@@ -244,5 +250,5 @@ module.exports = {
     Login,
     VerifyMagicLink,
     GetUserInfo,
-    googleLogin
+    googleAuth
 }

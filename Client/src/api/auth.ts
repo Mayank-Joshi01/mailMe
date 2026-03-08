@@ -66,3 +66,12 @@ export const GetUserProfile = async (): Promise<{ user : UserProfileResponse , s
         throw error;
     }
 };
+
+export const googleAuth = async (token: string): Promise<UserLoginResponse> => {
+    try {
+        const response = await API.post('/auth/google-auth', { token });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
