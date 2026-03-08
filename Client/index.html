@@ -4,10 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    
+    
+    <title>PostDrop</title>
+    
+    <style>
+      body, html { margin: 0; padding: 0; background-color: #09090b; }
+      #initial-loader { 
+        display: flex; justify-content: center; align-items: center; 
+        height: 100vh; color: #a1a1aa; font-family: system-ui, sans-serif; 
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loader">Starting PostDrop...</div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

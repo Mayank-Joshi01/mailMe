@@ -65,12 +65,13 @@ const EntriesSubmission = async (req, res) => {
                 { new: true, upsert: true }
             ),
             project.updateOne({ $inc: { totalEntries: 1 } }),
-            sendEmail(
+        ]);
+
+        sendEmail(
                 project.targetEmail,
                 "New Entry Submitted",
                 getSubmissionEmailTemplate(project.name, data)
             )
-        ]);
 
         return res.status(201).json({
             success: true,
